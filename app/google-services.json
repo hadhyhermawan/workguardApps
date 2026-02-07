@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "386935370556",
+    "project_id": "workguard-675d9",
+    "storage_bucket": "workguard-675d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386935370556:android:7a46c5a8dd6996368be439",
+        "android_client_info": {
+          "package_name": "com.workguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvHSGD3lYWvTJytvrmA3r7YjYJoYXKt00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,21 @@
+﻿# Gradle & build
+.gradle/
+**/build/
+
+# Local config
+local.properties
+
+# IDE
+.idea/
+*.iml
+
+# Signing (WAJIB JANGAN KEUPLOAD)
+*.jks
+*.keystore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Optional secrets
+.env
