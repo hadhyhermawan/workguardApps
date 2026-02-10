@@ -33,6 +33,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +48,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -428,11 +436,42 @@ private fun AttendancePhotoCircle(
     isLoading: Boolean
 ) {
     val context = LocalContext.current
+    val ringSize = 260.dp
+    val transition = rememberInfiniteTransition(label = "ring")
+    val rotation by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 4000, easing = LinearEasing)
+        ),
+        label = "ring-rotation"
+    )
+    val ringBrush = remember {
+        Brush.sweepGradient(
+            0f to UiTokens.Accent,
+            0.5f to UiTokens.Accent.copy(alpha = 0.15f),
+            1f to UiTokens.Accent
+        )
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .size(ringSize)
+        ) {
+            rotate(rotation) {
+                drawArc(
+                    brush = ringBrush,
+                    startAngle = 0f,
+                    sweepAngle = 300f,
+                    useCenter = false,
+                    style = Stroke(width = 6.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                )
+            }
+        }
         Card(
             shape = RoundedCornerShape(180.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFDADADA)),
