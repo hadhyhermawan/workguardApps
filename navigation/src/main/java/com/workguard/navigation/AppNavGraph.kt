@@ -255,7 +255,6 @@ fun AppNavGraph(
             PatrolScreen(
                 state = state,
                 onStartPatrol = viewModel::onStartPatrolRequested,
-                onPointSelected = viewModel::onPointSelected,
                 onPhotoCaptured = viewModel::onPhotoCaptured,
                 onCancelCapture = viewModel::onCancelCapture,
                 onClearError = viewModel::clearError
