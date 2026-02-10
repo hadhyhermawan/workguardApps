@@ -83,8 +83,8 @@ fun PatrolScreen(
     val muted = Color(0xFF7A878A)
     val poppins = remember {
         FontFamily(
-            Font(com.workguard.navigation.R.font.poppins_regular, FontWeight.Normal),
-            Font(com.workguard.navigation.R.font.poppins_semibold, FontWeight.SemiBold)
+            Font(com.workguard.R.font.poppins_regular, FontWeight.Normal),
+            Font(com.workguard.R.font.poppins_semibold, FontWeight.SemiBold)
         )
     }
     val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale("id", "ID")) }
