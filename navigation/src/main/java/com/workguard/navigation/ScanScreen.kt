@@ -198,11 +198,13 @@ fun ScanScreen(
                     fontWeight = FontWeight.Normal
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
 
             AttendancePhotoCircle(
                 photoUrl = resolveAttendancePhoto(state),
                 isLoading = state.isLoading
             )
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Card ringkas check-in/out + shift
             Row(
@@ -213,7 +215,9 @@ fun ScanScreen(
                     shape = RoundedCornerShape(28.dp),
                     colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(116.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -250,11 +254,13 @@ fun ScanScreen(
                     shape = RoundedCornerShape(28.dp),
                     colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(116.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
