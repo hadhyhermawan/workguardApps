@@ -501,9 +501,12 @@ private fun FaceScanOverlay(
                     contentDescription = "Kembali",
                     tint = Color.White,
                     modifier = Modifier
-                        .size(24.dp)
-                        .background(color = accent.copy(alpha = 0.4f), shape = RoundedCornerShape(50))
-                        .padding(2.dp)
+                        .size(36.dp)
+                        .background(
+                            color = accent.copy(alpha = 0.55f),
+                            shape = RoundedCornerShape(50)
+                        )
+                        .padding(6.dp)
                         .clickable { onBack() }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
