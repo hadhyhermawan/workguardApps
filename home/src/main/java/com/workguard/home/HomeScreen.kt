@@ -10,7 +10,6 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,7 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Close
@@ -87,7 +84,6 @@ import coil.request.ImageRequest
 import com.workguard.core.notification.AppBadgeNotifier
 import com.workguard.home.data.HomeActivityItem
 import com.workguard.home.data.HomeTaskItem
-import java.util.Calendar
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -96,7 +92,7 @@ fun HomeScreen(
     onTaskClick: () -> Unit,
     onRefresh: () -> Unit,
     onLocationPermissionResult: (Boolean) -> Unit,
-    onLoadScheduleMonth: (year: Int, month: Int, force: Boolean) -> Unit
+    onWorkScheduleClick: () -> Unit
 ) {
     val background = Color(0xFFF4F7F8)
     val cardColor = Color(0xFFFFFFFF)
@@ -170,13 +166,6 @@ fun HomeScreen(
 
     LaunchedEffect(violationsToday) {
         AppBadgeNotifier.updateViolationsBadge(context, violationsToday)
-    }
-
-    LaunchedEffect(showScheduleSheet) {
-        if (showScheduleSheet) {
-            val (year, month) = resolveActiveYearMonth(state.scheduleMonth)
-            onLoadScheduleMonth(year, month, false)
-        }
     }
 
     var hasLocationPermission by remember {
@@ -387,14 +376,17 @@ fun HomeScreen(
             onDismissRequest = { showScheduleSheet = false },
             sheetState = scheduleSheetState
         ) {
-            WorkScheduleBottomSheet(
+            AllMenuBottomSheet(
                 cardColor = cardColor,
                 accent = accent,
                 muted = muted,
-                monthState = state.scheduleMonth,
                 todaySchedule = state.todaySchedule,
+                isTodayLoading = state.isTodayScheduleLoading,
                 onClose = { showScheduleSheet = false },
-                onLoadMonth = onLoadScheduleMonth
+                onWorkScheduleClick = {
+                    showScheduleSheet = false
+                    onWorkScheduleClick()
+                }
             )
         }
     }
@@ -788,6 +780,130 @@ private fun WorkHoursCard(
 }
 
 @Composable
+private fun AllMenuBottomSheet(
+    cardColor: Color,
+    accent: Color,
+    muted: Color,
+    todaySchedule: WorkScheduleDay?,
+    isTodayLoading: Boolean,
+    onClose: () -> Unit,
+    onWorkScheduleClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "All Menu",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1F2A30),
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "Tutup",
+                    tint = muted
+                )
+            }
+        }
+        Text(
+            text = "Pilih menu untuk membuka halaman.",
+            style = MaterialTheme.typography.bodySmall,
+            color = muted
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+
+        MenuCard(
+            title = "Jadwal Kerja",
+            subtitle = buildString {
+                val shift = normalizeShiftName(todaySchedule?.shiftName)
+                val time = formatShiftRange(todaySchedule?.shiftStart, todaySchedule?.shiftEnd)
+                when {
+                    isTodayLoading -> append("Memuat jadwal hari ini...")
+                    shift != null && time.isNotBlank() -> append("$shift • $time")
+                    shift != null -> append(shift)
+                    else -> append("Kalender shift & jam kerja")
+                }
+            },
+            icon = Icons.Outlined.CalendarToday,
+            cardColor = cardColor,
+            accent = accent,
+            muted = muted,
+            onClick = onWorkScheduleClick
+        )
+    }
+}
+
+@Composable
+private fun MenuCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    cardColor: Color,
+    accent: Color,
+    muted: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(accent.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = accent,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color(0xFF1F2A30),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = subtitle,
+                    color = muted,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.ArrowForward,
+                contentDescription = "Buka",
+                tint = muted
+            )
+        }
+    }
+}
+
+@Composable
 private fun RowScope.StatCard(
     data: StatCardData,
     cardColor: Color,
@@ -1062,362 +1178,6 @@ private fun ActivityRow(
     }
 }
 
-@Composable
-private fun WorkScheduleBottomSheet(
-    cardColor: Color,
-    accent: Color,
-    muted: Color,
-    monthState: WorkScheduleMonthState,
-    todaySchedule: WorkScheduleDay?,
-    onClose: () -> Unit,
-    onLoadMonth: (year: Int, month: Int, force: Boolean) -> Unit
-) {
-    val (year, month) = resolveActiveYearMonth(monthState)
-    val monthPrefix = buildMonthPrefix(year, month)
-    val todayDate = todaySchedule?.date
-    val defaultSelectedDate = todayDate?.takeIf { it.startsWith(monthPrefix) } ?: "${monthPrefix}01"
-    var selectedDate by remember(year, month, todayDate) { mutableStateOf(defaultSelectedDate) }
-
-    val daysByDate = remember(monthState.days) { monthState.days.associateBy { it.date } }
-    val selectedSchedule = daysByDate[selectedDate]
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 24.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Jadwal Kerja",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF1F2A30),
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = onClose) {
-                Icon(
-                    imageVector = Icons.Outlined.Close,
-                    contentDescription = "Tutup",
-                    tint = muted
-                )
-            }
-        }
-        Text(
-            text = "Tap tanggal untuk lihat detail shift.",
-            style = MaterialTheme.typography.bodySmall,
-            color = muted
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        val navigationEnabled = !monthState.isLoading
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {
-                    val (prevYear, prevMonth) = previousYearMonth(year, month)
-                    onLoadMonth(prevYear, prevMonth, false)
-                },
-                enabled = navigationEnabled
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "Bulan sebelumnya",
-                    tint = if (navigationEnabled) muted else muted.copy(alpha = 0.4f)
-                )
-            }
-            Text(
-                text = formatMonthYear(year, month),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF1F2A30),
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
-            )
-            IconButton(
-                onClick = {
-                    val (nextYear, nextMonth) = nextYearMonth(year, month)
-                    onLoadMonth(nextYear, nextMonth, false)
-                },
-                enabled = navigationEnabled
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ArrowForward,
-                    contentDescription = "Bulan berikutnya",
-                    tint = if (navigationEnabled) muted else muted.copy(alpha = 0.4f)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        val hasMonthData = monthState.days.isNotEmpty()
-        if (monthState.isLoading && !hasMonthData) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 26.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = accent,
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-        } else {
-            if (!monthState.errorMessage.isNullOrBlank()) {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF1F2)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Sebagian jadwal gagal dimuat",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF9F1239)
-                            )
-                            Text(
-                                text = monthState.errorMessage ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF9F1239)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Button(
-                            onClick = { onLoadMonth(year, month, true) },
-                            colors = ButtonDefaults.buttonColors(containerColor = accent)
-                        ) {
-                            Text("Muat ulang")
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            if (!hasMonthData) {
-                EmptyStateCard(text = "Jadwal bulan ini belum tersedia.")
-            } else {
-                WorkScheduleCalendar(
-                    year = year,
-                    month = month,
-                    daysByDate = daysByDate,
-                    selectedDate = selectedDate,
-                    todayDate = todayDate,
-                    accent = accent,
-                    muted = muted,
-                    onSelectDate = { selectedDate = it }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                WorkScheduleDayDetailCard(
-                    date = selectedDate,
-                    schedule = selectedSchedule,
-                    cardColor = cardColor,
-                    accent = accent,
-                    muted = muted
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun WorkScheduleCalendar(
-    year: Int,
-    month: Int,
-    daysByDate: Map<String, WorkScheduleDay>,
-    selectedDate: String,
-    todayDate: String?,
-    accent: Color,
-    muted: Color,
-    onSelectDate: (String) -> Unit
-) {
-    val weekdayLabels = listOf("Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min")
-    Row(modifier = Modifier.fillMaxWidth()) {
-        weekdayLabels.forEach { label ->
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = muted,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-
-    val (offset, daysInMonth) = remember(year, month) {
-        val cal = Calendar.getInstance().apply {
-            set(Calendar.YEAR, year)
-            set(Calendar.MONTH, month - 1)
-            set(Calendar.DAY_OF_MONTH, 1)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) // 1=Sun ... 7=Sat
-        val mondayBasedOffset = (dayOfWeek + 5) % 7 // 0=Mon ... 6=Sun
-        mondayBasedOffset to cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-    }
-    val rows = remember(offset, daysInMonth) { ((offset + daysInMonth + 6) / 7).coerceAtLeast(5) }
-    val monthPrefix = remember(year, month) { buildMonthPrefix(year, month) }
-    val shape = RoundedCornerShape(14.dp)
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        for (rowIndex in 0 until rows) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (colIndex in 0 until 7) {
-                    val cellIndex = rowIndex * 7 + colIndex
-                    val day = cellIndex - offset + 1
-                    if (day < 1 || day > daysInMonth) {
-                        Box(modifier = Modifier.weight(1f).aspectRatio(1f))
-                    } else {
-                        val date = "${monthPrefix}${day.toString().padStart(2, '0')}"
-                        val schedule = daysByDate[date]
-                        val shift = normalizeShiftName(schedule?.shiftName)
-                        val shiftColor = resolveShiftColor(shift, accent, muted)
-                        val isSelected = date == selectedDate
-                        val isToday = date == todayDate
-                        val borderColor = when {
-                            isSelected -> accent
-                            else -> Color(0xFFE5EAEC)
-                        }
-                        val backgroundColor = when {
-                            isSelected -> accent.copy(alpha = 0.12f)
-                            isToday -> accent.copy(alpha = 0.07f)
-                            else -> Color.Transparent
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .clip(shape)
-                                .background(backgroundColor)
-                                .border(width = 1.dp, color = borderColor, shape = shape)
-                                .clickable { onSelectDate(date) }
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = day.toString(),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (isToday || isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isToday) accent else Color(0xFF1F2A30)
-                            )
-                            if (shift != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .clip(RoundedCornerShape(999.dp))
-                                        .background(shiftColor.copy(alpha = 0.14f))
-                                        .padding(horizontal = 7.dp, vertical = 3.dp)
-                                ) {
-                                    Text(
-                                        text = shift,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = shiftColor
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WorkScheduleDayDetailCard(
-    date: String,
-    schedule: WorkScheduleDay?,
-    cardColor: Color,
-    accent: Color,
-    muted: Color
-) {
-    val shiftName = normalizeShiftName(schedule?.shiftName)
-    val timeRange = formatShiftRange(schedule?.shiftStart, schedule?.shiftEnd)
-    val reason = schedule?.reason?.trim().orEmpty()
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = formatHumanDate(date),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF1F2A30)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            when {
-                schedule == null -> {
-                    Text(
-                        text = "Jadwal belum dimuat.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = muted
-                    )
-                }
-                shiftName != null -> {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(999.dp))
-                                .background(resolveShiftColor(shiftName, accent, muted).copy(alpha = 0.14f))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = shiftName,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = resolveShiftColor(shiftName, accent, muted)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = timeRange.ifBlank { "-" },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = muted
-                        )
-                    }
-                }
-                reason.isNotBlank() -> {
-                    Text(
-                        text = reason,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = muted
-                    )
-                }
-                else -> {
-                    Text(
-                        text = "Tidak ada jadwal.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = muted
-                    )
-                }
-            }
-        }
-    }
-}
-
 private data class StatCardData(
     val value: String,
     val label: String,
@@ -1517,45 +1277,6 @@ private fun formatQuickTime(value: String?): String {
     return formatter.format(java.util.Date(millis))
 }
 
-private fun resolveActiveYearMonth(monthState: WorkScheduleMonthState): Pair<Int, Int> {
-    val year = monthState.year
-    val month = monthState.month
-    if (year > 0 && month in 1..12) return year to month
-    val cal = Calendar.getInstance()
-    return cal.get(Calendar.YEAR) to (cal.get(Calendar.MONTH) + 1)
-}
-
-private fun previousYearMonth(year: Int, month: Int): Pair<Int, Int> {
-    return if (month == 1) (year - 1) to 12 else year to (month - 1)
-}
-
-private fun nextYearMonth(year: Int, month: Int): Pair<Int, Int> {
-    return if (month == 12) (year + 1) to 1 else year to (month + 1)
-}
-
-private fun buildMonthPrefix(year: Int, month: Int): String {
-    return "${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-"
-}
-
-private fun formatMonthYear(year: Int, month: Int): String {
-    val months = listOf(
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember"
-    )
-    val name = months.getOrNull(month - 1) ?: month.toString()
-    return "$name $year"
-}
-
 private fun formatHumanDate(date: String): String {
     // Expected: yyyy-MM-dd
     if (date.length < 10) return date
@@ -1585,17 +1306,6 @@ private fun normalizeShiftName(raw: String?): String? {
     if (value.isBlank()) return null
     val withoutPrefix = value.replace(Regex("^shift\\s+", RegexOption.IGNORE_CASE), "")
     return withoutPrefix.trim().ifBlank { value }
-}
-
-private fun resolveShiftColor(shiftName: String?, accent: Color, muted: Color): Color {
-    val normalized = shiftName?.trim()?.lowercase().orEmpty()
-    return when {
-        normalized.contains("pagi") -> accent
-        normalized.contains("sore") -> Color(0xFFF59E0B)
-        normalized.contains("malam") -> Color(0xFF6366F1)
-        normalized.isBlank() -> muted
-        else -> accent
-    }
 }
 
 private fun formatShiftRange(shiftStart: String?, shiftEnd: String?): String {

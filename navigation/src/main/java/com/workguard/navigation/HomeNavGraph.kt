@@ -30,6 +30,8 @@ import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.workguard.home.HomeScreen
 import com.workguard.home.HomeViewModel
+import com.workguard.home.WorkScheduleScreen
+import com.workguard.home.WorkScheduleViewModel
 import com.workguard.face.FaceEnrollmentCaptureScreen
 import com.workguard.face.FaceEnrollmentViewModel
 import com.workguard.attendance.AttendanceViewModel
@@ -64,6 +66,7 @@ fun HomeNavGraph(
             Routes.News -> "News"
             Routes.NewsDetail -> "News"
             Routes.Settings -> "Settings"
+            Routes.WorkSchedule -> "Jadwal kerja"
             Routes.PrivacyData -> "Privasi data"
             Routes.Policy -> "Kebijakan"
             Routes.Help -> "Bantuan"
@@ -167,7 +170,20 @@ fun HomeNavGraph(
                     onTaskClick = onTaskClick,
                     onRefresh = viewModel::refresh,
                     onLocationPermissionResult = viewModel::onLocationPermissionResult,
-                    onLoadScheduleMonth = viewModel::loadScheduleMonth
+                    onWorkScheduleClick = {
+                        navController.navigate(Routes.WorkSchedule) { launchSingleTop = true }
+                    }
+                )
+            }
+
+            composable(Routes.WorkSchedule) {
+                val viewModel: WorkScheduleViewModel = hiltViewModel()
+                val state by viewModel.state.collectAsState()
+
+                WorkScheduleScreen(
+                    state = state,
+                    onRefresh = viewModel::refresh,
+                    onLoadMonth = viewModel::loadMonth
                 )
             }
 

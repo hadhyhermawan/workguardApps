@@ -22,6 +22,7 @@ object Routes {
     const val NewsIdArg = "newsId"
     const val NewsDetail = "news/{$NewsIdArg}"
     const val Settings = "settings"
+    const val WorkSchedule = "work_schedule"
     const val PrivacyData = "settings/privacy"
     const val Policy = "settings/policy"
     const val Help = "settings/help"
