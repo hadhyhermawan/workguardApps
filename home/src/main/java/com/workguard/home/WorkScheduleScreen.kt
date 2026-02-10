@@ -169,7 +169,7 @@ fun WorkScheduleScreen(
                 }
 
                 if (!hasMonthData) {
-                    EmptyStateCard(text = "Jadwal bulan ini belum tersedia.")
+                    EmptyStateCard(text = "Belum ada jadwal.")
                     Spacer(modifier = Modifier.height(12.dp))
                 } else {
                     WorkScheduleCalendar(
