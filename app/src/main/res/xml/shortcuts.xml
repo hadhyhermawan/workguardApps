@@ -4,9 +4,9 @@
         android:shortcutId="internet_connectivity"
         android:enabled="true"
         android:icon="@drawable/ic_workguard_logo"
-        android:shortcutShortLabel="Wi-Fi"
-        android:shortcutLongLabel="Ubah Wi-Fi / Internet"
-        android:shortcutDisabledMessage="Shortcut tidak tersedia">
+        android:shortcutShortLabel="@string/shortcut_wifi_short_label"
+        android:shortcutLongLabel="@string/shortcut_wifi_long_label"
+        android:shortcutDisabledMessage="@string/shortcut_unavailable">
         <intent
             android:action="com.workguard.action.OPEN_INTERNET_CONNECTIVITY"
             android:targetPackage="com.workguard"
@@ -17,13 +17,12 @@
         android:shortcutId="bluetooth_settings"
         android:enabled="true"
         android:icon="@drawable/ic_workguard_logo"
-        android:shortcutShortLabel="Bluetooth"
-        android:shortcutLongLabel="Ubah Bluetooth"
-        android:shortcutDisabledMessage="Shortcut tidak tersedia">
+        android:shortcutShortLabel="@string/shortcut_bluetooth_short_label"
+        android:shortcutLongLabel="@string/shortcut_bluetooth_long_label"
+        android:shortcutDisabledMessage="@string/shortcut_unavailable">
         <intent
             android:action="com.workguard.action.OPEN_BLUETOOTH_SETTINGS"
             android:targetPackage="com.workguard"
             android:targetClass="com.workguard.MainActivity" />
     </shortcut>
 </shortcuts>
-

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WorkGuard</string>
+    <string name="shortcut_wifi_short_label">Wi-Fi</string>
+    <string name="shortcut_wifi_long_label">Ubah Wi-Fi / Internet</string>
+    <string name="shortcut_bluetooth_short_label">Bluetooth</string>
+    <string name="shortcut_bluetooth_long_label">Ubah Bluetooth</string>
+    <string name="shortcut_unavailable">Shortcut tidak tersedia</string>
 </resources>
