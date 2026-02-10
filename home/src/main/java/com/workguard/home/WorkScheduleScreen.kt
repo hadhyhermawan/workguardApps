@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
@@ -190,6 +191,14 @@ fun WorkScheduleScreen(
                         cardColor = cardColor,
                         accent = accent,
                         muted = muted
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    DayScheduleList(
+                        days = monthState.days,
+                        accent = accent,
+                        muted = muted,
+                        cardColor = cardColor
                     )
                 }
             }
@@ -447,6 +456,157 @@ private fun WorkScheduleDayDetailCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DayScheduleList(
+    days: List<WorkScheduleDay>,
+    accent: Color,
+    muted: Color,
+    cardColor: Color
+) {
+    val sorted = remember(days) { days.sortedByDescending { it.date } }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = "Jadwal bulan ini",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF1F2A30)
+        )
+        if (sorted.isEmpty()) {
+            EmptyStateCard(text = "Belum ada jadwal pada bulan ini.")
+        } else {
+            sorted.forEach { day ->
+                DayScheduleCard(
+                    day = day,
+                    accent = accent,
+                    muted = muted,
+                    cardColor = cardColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayScheduleCard(
+    day: WorkScheduleDay,
+    accent: Color,
+    muted: Color,
+    cardColor: Color
+) {
+    val dateInfo = remember(day.date) { parseDateInfo(day.date) }
+    val shift = normalizeShiftName(day.shiftName)
+    val timeRange = formatShiftRange(day.shiftStart, day.shiftEnd)
+    val reason = day.reason?.trim().orEmpty()
+    Card(
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(accent.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = dateInfo.dayOfMonth,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = accent
+                    )
+                    Text(
+                        text = dateInfo.dayOfWeek,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = accent
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = dateInfo.formattedDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                when {
+                    shift != null -> {
+                        Text(
+                            text = shift,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1F2A30)
+                        )
+                        Text(
+                            text = timeRange.ifBlank { "-" },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                    reason.isNotBlank() -> {
+                        Text(
+                            text = reason,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "Tidak ada jadwal",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class DateInfo(
+    val dayOfMonth: String,
+    val dayOfWeek: String,
+    val formattedDate: String
+)
+
+private fun parseDateInfo(date: String): DateInfo {
+    // Expects yyyy-MM-dd
+    val cal = Calendar.getInstance()
+    return try {
+        val parts = date.split("-")
+        val year = parts.getOrNull(0)?.toIntOrNull() ?: 1970
+        val month = parts.getOrNull(1)?.toIntOrNull()?.minus(1) ?: 0
+        val day = parts.getOrNull(2)?.toIntOrNull() ?: 1
+        cal.set(year, month, day)
+        val dayName = cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale("id", "ID"))
+            ?.replaceFirstChar { it.uppercase() }
+            ?: "Day"
+        val monthName = cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale("id", "ID"))
+            ?.replaceFirstChar { it.uppercase() }
+            ?: "Mon"
+        DateInfo(
+            dayOfMonth = day.toString().padStart(2, '0'),
+            dayOfWeek = dayName,
+            formattedDate = "$day $monthName $year"
+        )
+    } catch (_: Exception) {
+        DateInfo(
+            dayOfMonth = "--",
+            dayOfWeek = "Day",
+            formattedDate = date
+        )
     }
 }
 
