@@ -2,7 +2,7 @@
 setlocal
 
 set APP_HOME=%~dp0
-set CLASSPATH=%APP_HOME%gradle\wrapper\gradle-wrapper.jar;%APP_HOME%gradle\wrapper\gradle-wrapper-shared.jar
+set CLASSPATH=%APP_HOME%gradle\wrapper\gradle-wrapper.jar;%APP_HOME%gradle\wrapper\gradle-wrapper-shared.jar;%APP_HOME%gradle\wrapper\gradle-cli.jar;%APP_HOME%gradle\wrapper\gradle-base-annotations.jar;%APP_HOME%gradle\wrapper\gradle-files.jar;%APP_HOME%gradle\wrapper\gradle-functional.jar
 
 if defined JAVA_HOME (
   set JAVA_EXE=%JAVA_HOME%\bin\java.exe

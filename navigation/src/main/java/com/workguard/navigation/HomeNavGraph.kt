@@ -165,8 +165,9 @@ fun HomeNavGraph(
                 HomeScreen(
                     state = state,
                     onTaskClick = onTaskClick,
-                    onRefresh = { viewModel.loadHome() },
-                    onLocationPermissionResult = viewModel::onLocationPermissionResult
+                    onRefresh = viewModel::refresh,
+                    onLocationPermissionResult = viewModel::onLocationPermissionResult,
+                    onLoadScheduleMonth = viewModel::loadScheduleMonth
                 )
             }
 

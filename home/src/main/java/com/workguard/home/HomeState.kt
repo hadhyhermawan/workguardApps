@@ -17,6 +17,9 @@ data class HomeState(
     val todayTasks: List<HomeTaskItem> = emptyList(),
     val recentActivities: List<HomeActivityItem> = emptyList(),
     val quickStats: HomeQuickStats = HomeQuickStats(),
+    val todaySchedule: WorkScheduleDay? = null,
+    val isTodayScheduleLoading: Boolean = false,
+    val scheduleMonth: WorkScheduleMonthState = WorkScheduleMonthState(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
