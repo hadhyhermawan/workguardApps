@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,14 +33,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -245,15 +241,6 @@ fun HomeScreen(
                 accent = accent
             )
             Spacer(modifier = Modifier.height(18.dp))
-            ConnectivityShortcutSection(
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                onWifiClick = { openInternetConnectivitySettings(context) },
-                onBluetoothClick = { openBluetoothSettings(context) },
-                onDisablePauseIfUnusedClick = { openAppDetailsSettings(context) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
             QuickStatsSection(
                 cardColor = cardColor,
                 accent = accent,
@@ -514,110 +501,6 @@ private fun LocationServicesCard(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16B3A8))
             ) {
                 Text("Aktifkan")
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConnectivityShortcutSection(
-    cardColor: Color,
-    accent: Color,
-    muted: Color,
-    onWifiClick: () -> Unit,
-    onBluetoothClick: () -> Unit,
-    onDisablePauseIfUnusedClick: () -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = "Pintasan",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1F2A30)
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ConnectivityShortcutCard(
-                title = "Wi-Fi",
-                subtitle = "Ubah koneksi internet",
-                icon = Icons.Outlined.Wifi,
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                onClick = onWifiClick
-            )
-            ConnectivityShortcutCard(
-                title = "Bluetooth",
-                subtitle = "Ubah koneksi perangkat",
-                icon = Icons.Outlined.Bluetooth,
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                onClick = onBluetoothClick
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ConnectivityShortcutCard(
-                title = "Jeda aplikasi",
-                subtitle = "Matikan jika tak terpakai",
-                icon = Icons.Outlined.Settings,
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                onClick = onDisablePauseIfUnusedClick
-            )
-            Spacer(modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun RowScope.ConnectivityShortcutCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    cardColor: Color,
-    accent: Color,
-    muted: Color,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .weight(1f)
-            .height(88.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Column(modifier = Modifier.fillMaxWidth().padding(end = 24.dp)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1F2A30)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(accent.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = accent,
-                    modifier = Modifier.size(16.dp)
-                )
             }
         }
     }
@@ -1026,52 +909,6 @@ private fun formatQuickTime(value: String?): String {
 private fun checkLocationEnabled(context: Context): Boolean {
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return LocationManagerCompat.isLocationEnabled(manager)
-}
-
-private fun openInternetConnectivitySettings(context: Context) {
-    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
-    } else {
-        Intent(Settings.ACTION_WIFI_SETTINGS)
-    }
-    runCatching {
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-    }.onFailure {
-        runCatching {
-            context.startActivity(
-                Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        }
-    }
-}
-
-private fun openBluetoothSettings(context: Context) {
-    runCatching {
-        context.startActivity(
-            Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
-    }.onFailure {
-        runCatching {
-            context.startActivity(
-                Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        }
-    }
-}
-
-private fun openAppDetailsSettings(context: Context) {
-    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-        data = Uri.fromParts("package", context.packageName, null)
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    runCatching { context.startActivity(intent) }
-        .onFailure {
-            runCatching {
-                context.startActivity(
-                    Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-            }
-        }
 }
 
 private fun startTrackingService(context: Context) {

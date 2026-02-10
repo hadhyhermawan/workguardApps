@@ -1,5 +1,10 @@
 package com.workguard.navigation
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings as AndroidSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -26,9 +32,11 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,6 +66,7 @@ fun SettingsScreen(
     onFaceEnrollmentClick: () -> Unit,
     onProfileClick: () -> Unit
 ) {
+    val context = LocalContext.current
     var notificationsEnabled by remember { mutableStateOf(true) }
     var biometricEnabled by remember { mutableStateOf(true) }
     var autoSyncEnabled by remember { mutableStateOf(false) }
@@ -202,6 +212,52 @@ fun SettingsScreen(
             }
 
             item {
+                SectionHeader(title = "Perangkat")
+            }
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Wifi,
+                    title = "Wi-Fi / Internet",
+                    subtitle = "Buka pengaturan koneksi",
+                    onClick = { openInternetConnectivitySettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Bluetooth,
+                    title = "Bluetooth",
+                    subtitle = "Buka pengaturan bluetooth",
+                    onClick = { openBluetoothSettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Settings,
+                    title = "Info aplikasi",
+                    subtitle = "Matikan jeda aktivitas jika tak terpakai",
+                    onClick = { openAppDetailsSettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+
+            item {
                 SectionHeader(title = "Preferensi")
             }
             item {
@@ -255,6 +311,29 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+private fun openInternetConnectivitySettings(context: Context) {
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        Intent(AndroidSettings.Panel.ACTION_INTERNET_CONNECTIVITY)
+    } else {
+        Intent(AndroidSettings.ACTION_WIFI_SETTINGS)
+    }
+    runCatching { context.startActivity(intent) }
+        .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
+}
+
+private fun openBluetoothSettings(context: Context) {
+    runCatching { context.startActivity(Intent(AndroidSettings.ACTION_BLUETOOTH_SETTINGS)) }
+        .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
+}
+
+private fun openAppDetailsSettings(context: Context) {
+    val intent = Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    runCatching { context.startActivity(intent) }
+        .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
 }
 
 @Composable
