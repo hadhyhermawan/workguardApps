@@ -274,11 +274,12 @@ fun HomeScreen(
                 locationLabel = locationLabel
             )
             Spacer(modifier = Modifier.height(18.dp))
-            QuickStatsSection(
+            QuickStatsGrid(
                 cardColor = cardColor,
                 accent = accent,
                 muted = muted,
-                stats = statCards
+                stats = statCards.take(4), // Check in/out, izin, lembur
+                statusCard = statCards.getOrNull(4)
             )
             Spacer(modifier = Modifier.height(12.dp))
             AllMenuCard(
@@ -449,9 +450,9 @@ private fun HeaderSection(
                 Text(
                     text = dateLabel,
                     color = Color(0xFF6D7A7E),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.weight(1f)
+                    style = MaterialTheme.typography.labelSmall
                 )
+                Spacer(modifier = Modifier.weight(1f))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -639,11 +640,13 @@ private fun LocationServicesCard(
 }
 
 @Composable
-private fun QuickStatsSection(
+@Composable
+private fun QuickStatsGrid(
     cardColor: Color,
     accent: Color,
     muted: Color,
-    stats: List<StatCardData>
+    stats: List<StatCardData>,
+    statusCard: StatCardData?
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         stats.chunked(2).forEach { rowItems ->
@@ -656,10 +659,15 @@ private fun QuickStatsSection(
                         muted = muted
                     )
                 }
-                if (rowItems.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
             }
+        }
+        if (statusCard != null) {
+            StatCardFullWidth(
+                data = statusCard,
+                cardColor = cardColor,
+                accent = accent,
+                muted = muted
+            )
         }
     }
 }
@@ -978,6 +986,55 @@ private fun RowScope.StatCard(
     }
     Card(
         modifier = clickableModifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Column {
+                Text(
+                    text = data.value,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF1F2A30)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = data.label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = muted
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(accent.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = data.icon,
+                    contentDescription = data.label,
+                    tint = accent,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatCardFullWidth(
+    data: StatCardData,
+    cardColor: Color,
+    accent: Color,
+    muted: Color
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(96.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
