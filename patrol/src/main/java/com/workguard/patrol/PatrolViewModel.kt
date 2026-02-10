@@ -270,7 +270,6 @@ class PatrolViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            selectedPoint = null,
                             statusMessage = if (sessionComplete) {
                                 "Sesi selesai, kembali ke beranda"
                             } else {
