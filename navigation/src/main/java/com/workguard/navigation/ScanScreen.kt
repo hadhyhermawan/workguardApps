@@ -232,7 +232,7 @@ fun ScanScreen(
                         Column(horizontalAlignment = Alignment.Start) {
                             Text("Masuk", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontFamily = poppins)
                             Text(checkInText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text, fontFamily = poppins, fontWeight = FontWeight.SemiBold)
-                            val start = state.shiftStart?.takeIf { it.isNotBlank() }
+                            val start = formatShiftTime(state.shiftStart)
                             if (start != null) {
                                 Text(start, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp, fontFamily = poppins)
                             }
@@ -246,7 +246,7 @@ fun ScanScreen(
                         Column(horizontalAlignment = Alignment.End) {
                             Text("Pulang", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontFamily = poppins)
                             Text(checkOutText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text, fontFamily = poppins, fontWeight = FontWeight.SemiBold)
-                            val end = state.shiftEnd?.takeIf { it.isNotBlank() }
+                            val end = formatShiftTime(state.shiftEnd)
                             if (end != null) {
                                 Text(end, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp, fontFamily = poppins)
                             }
@@ -501,9 +501,20 @@ private fun formatTime(value: String?, formatter: SimpleDateFormat): String {
     return if (millis == null) "--:--" else formatter.format(Date(millis))
 }
 
+private fun formatShiftTime(value: String?): String? {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isBlank()) return null
+    val millis = IsoTimeUtil.parseMillis(trimmed)
+    if (millis != null) {
+        return SimpleDateFormat("HH:mm", Locale("id", "ID")).format(Date(millis))
+    }
+    val regex = Regex("^\\d{2}:\\d{2}(:\\d{2})?$")
+    return if (regex.matches(trimmed)) trimmed.take(5) else trimmed
+}
+
 private fun buildScheduleText(state: AttendanceState): String {
-    val start = state.shiftStart
-    val end = state.shiftEnd
+    val start = formatShiftTime(state.shiftStart)
+    val end = formatShiftTime(state.shiftEnd)
     val name = state.shiftName?.takeIf { it.isNotBlank() } ?: "Shift"
     return if (!start.isNullOrBlank() && !end.isNullOrBlank()) {
         "$name - $start - $end"
