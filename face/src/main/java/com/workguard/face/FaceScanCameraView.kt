@@ -50,8 +50,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -472,17 +475,13 @@ private fun FaceScanOverlay(
 ) {
     val ringColor = if (faceDetected) accent else accentDark
     Box(modifier = Modifier.fillMaxSize()) {
-        CornerFrame(
+        InwardRoundedFrame(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(190.dp),
-            color = accent.copy(alpha = 0.55f)
-        )
-        CornerFrame(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(150.dp),
-            color = ringColor
+                .size(176.dp),
+            color = ringColor,
+            strokeWidth = 4.dp,
+            cornerRadius = 28.dp
         )
         Row(
             modifier = Modifier
@@ -506,30 +505,28 @@ private fun FaceScanOverlay(
 }
 
 @Composable
-private fun CornerFrame(
+private fun InwardRoundedFrame(
     modifier: Modifier,
     color: Color,
     strokeWidth: Dp = 3.dp,
-    cornerLengthFraction: Float = 0.22f
+    cornerRadius: Dp = 24.dp
 ) {
     Canvas(modifier = modifier) {
         val strokePx = strokeWidth.toPx()
-        val corner = size.minDimension * cornerLengthFraction
-        val maxX = size.width
-        val maxY = size.height
-        val cap = StrokeCap.Square
+        val radiusPx = cornerRadius.toPx()
+        val inset = strokePx / 2f
 
-        drawLine(color, Offset(0f, 0f), Offset(corner, 0f), strokePx, cap)
-        drawLine(color, Offset(0f, 0f), Offset(0f, corner), strokePx, cap)
-
-        drawLine(color, Offset(maxX, 0f), Offset(maxX - corner, 0f), strokePx, cap)
-        drawLine(color, Offset(maxX, 0f), Offset(maxX, corner), strokePx, cap)
-
-        drawLine(color, Offset(0f, maxY), Offset(corner, maxY), strokePx, cap)
-        drawLine(color, Offset(0f, maxY), Offset(0f, maxY - corner), strokePx, cap)
-
-        drawLine(color, Offset(maxX, maxY), Offset(maxX - corner, maxY), strokePx, cap)
-        drawLine(color, Offset(maxX, maxY), Offset(maxX, maxY - corner), strokePx, cap)
+        drawRoundRect(
+            color = color,
+            topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+            size = Size(size.width - strokePx, size.height - strokePx),
+            cornerRadius = CornerRadius(radiusPx, radiusPx),
+            style = Stroke(
+                width = strokePx,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
     }
 }
 
