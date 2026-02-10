@@ -138,6 +138,7 @@ fun PatrolScreen(
                 point = nextPoint,
                 isLoading = state.isLoading,
                 errorMessage = state.errorMessage,
+                successMessage = state.statusMessage,
                 onPhotoCaptured = onPhotoCaptured,
                 onCancel = onCancelCapture,
                 onClearError = onClearError
@@ -375,6 +376,7 @@ private fun PatrolCaptureScreen(
     point: PatrolPoint,
     isLoading: Boolean,
     errorMessage: String?,
+    successMessage: String?,
     onPhotoCaptured: (File) -> Unit,
     onCancel: () -> Unit,
     onClearError: () -> Unit
@@ -417,6 +419,7 @@ private fun PatrolCaptureScreen(
                 onPhotoCaptured = onPhotoCaptured,
                 isLoading = isLoading,
                 errorMessage = errorMessage,
+                successMessage = successMessage,
                 onClearError = onClearError,
                 onCancel = onCancel
             )
@@ -532,6 +535,7 @@ private fun PatrolCameraPreview(
     onPhotoCaptured: (File) -> Unit,
     isLoading: Boolean,
     errorMessage: String?,
+    successMessage: String?,
     onClearError: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -642,6 +646,9 @@ private fun PatrolCameraPreview(
             )
         }
 
+        val showSuccess = !isCapturing && !isLoading && cameraError == null && errorMessage == null &&
+            successMessage?.contains("Berhasil", ignoreCase = true) == true
+
         if (cameraError != null) {
             InfoCard(
                 message = cameraError ?: "Gagal membuka kamera",
@@ -700,7 +707,7 @@ private fun PatrolCameraPreview(
             Text(if (isLoading) "Mengirim..." else "Ambil Foto")
         }
 
-        if (!isCapturing && !isLoading && cameraError == null && errorMessage == null && state.statusMessage?.contains("Berhasil", ignoreCase = true) == true) {
+        if (showSuccess) {
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
