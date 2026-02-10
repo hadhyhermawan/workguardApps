@@ -197,13 +197,6 @@ fun ScanScreen(
                     fontFamily = poppins,
                     fontWeight = FontWeight.Normal
                 )
-                Text(
-                    text = "Absensi harian",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = UiTokens.Muted,
-                    fontFamily = poppins,
-                    fontWeight = FontWeight.Normal
-                )
             }
 
             AttendancePhotoCircle(
