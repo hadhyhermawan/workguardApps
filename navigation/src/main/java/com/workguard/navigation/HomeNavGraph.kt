@@ -43,7 +43,6 @@ import com.workguard.profile.ProfileViewModel
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeNavGraph(
-    onAttendanceClick: () -> Unit,
     onTaskClick: () -> Unit,
     onLogout: () -> Unit,
     initialRoute: String? = null,
@@ -162,7 +161,6 @@ fun HomeNavGraph(
 
                 HomeScreen(
                     state = state,
-                    onAttendanceClick = onAttendanceClick,
                     onTaskClick = onTaskClick,
                     onRefresh = { viewModel.loadHome() },
                     onLocationPermissionResult = viewModel::onLocationPermissionResult

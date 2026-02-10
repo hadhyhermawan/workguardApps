@@ -6,7 +6,6 @@ object Routes {
     const val Auth = "auth"
     const val HomeRoot = "home_root"
     const val Home = "home"
-    const val Attendance = "attendance"
     const val TaskStart = "task/start"
     const val TaskCamera = "task/camera"
     const val TaskComplete = "task/complete"

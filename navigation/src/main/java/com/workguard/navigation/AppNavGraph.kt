@@ -10,9 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.workguard.attendance.AttendanceEvent
-import com.workguard.attendance.AttendanceScreen
-import com.workguard.attendance.AttendanceViewModel
 import com.workguard.auth.AuthEvent
 import com.workguard.auth.AuthScreen
 import com.workguard.auth.AuthSessionViewModel
@@ -71,7 +68,6 @@ fun AppNavGraph(
             val context = LocalContext.current
             val sessionViewModel: AuthSessionViewModel = hiltViewModel()
             HomeNavGraph(
-                onAttendanceClick = { navController.navigate(Routes.Attendance) },
                 onTaskClick = { navController.navigate(Routes.Patrol) },
                 onLogout = {
                     sessionViewModel.logout()
@@ -82,35 +78,6 @@ fun AppNavGraph(
                 },
                 initialRoute = initialHomeRoute,
                 onRouteConsumed = onHomeRouteConsumed
-            )
-        }
-
-        composable(Routes.Attendance) { backStackEntry ->
-            val viewModel: AttendanceViewModel = hiltViewModel()
-            val state by viewModel.state.collectAsState()
-            val faceResult by backStackEntry.savedStateHandle
-                .getStateFlow(Routes.FaceResultKey, "")
-                .collectAsState()
-
-            LaunchedEffect(faceResult) {
-                if (faceResult.isNotBlank()) {
-                    viewModel.onFaceScanCompleted()
-                    backStackEntry.savedStateHandle[Routes.FaceResultKey] = ""
-                }
-            }
-
-            LaunchedEffect(Unit) {
-                viewModel.events.collect { event ->
-                    if (event is AttendanceEvent.RequireFaceScan) {
-                        navController.navigate(Routes.faceScan(event.context))
-                    }
-                }
-            }
-
-            AttendanceScreen(
-                state = state,
-                onCheckInClick = viewModel::onCheckInClicked,
-                onCheckOutClick = viewModel::onCheckOutClicked
             )
         }
 

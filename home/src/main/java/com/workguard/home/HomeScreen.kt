@@ -74,6 +74,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
+import com.workguard.core.notification.AppBadgeNotifier
 import com.workguard.home.data.HomeActivityItem
 import com.workguard.home.data.HomeTaskItem
 
@@ -81,7 +82,6 @@ import com.workguard.home.data.HomeTaskItem
 @OptIn(ExperimentalMaterialApi::class)
 fun HomeScreen(
     state: HomeState,
-    onAttendanceClick: () -> Unit,
     onTaskClick: () -> Unit,
     onRefresh: () -> Unit,
     onLocationPermissionResult: (Boolean) -> Unit
@@ -109,6 +109,7 @@ fun HomeScreen(
     val recentActivities = state.recentActivities
     val taskSummary = state.todayTaskSummary
     val quickStats = state.quickStats
+    val violationsToday = quickStats.violationsToday
     val highlightedTask = todayTasks.firstOrNull()
     val taskCardTitle = highlightedTask?.title?.takeIf { it.isNotBlank() } ?: "Task Patroli"
     val taskCardSchedule = highlightedTask?.let { formatTaskSchedule(it) } ?: "Jadwal belum tersedia"
@@ -119,14 +120,12 @@ fun HomeScreen(
         StatCardData(
             value = formatQuickTime(quickStats.checkInAt),
             label = "Check In",
-            icon = Icons.Outlined.PlayArrow,
-            onClick = onAttendanceClick
+            icon = Icons.Outlined.PlayArrow
         ),
         StatCardData(
             value = formatQuickTime(quickStats.checkOutAt),
             label = "Check Out",
-            icon = Icons.Outlined.Stop,
-            onClick = onAttendanceClick
+            icon = Icons.Outlined.Stop
         ),
         StatCardData(
             value = quickStats.pendingPermits.toString(),
@@ -139,11 +138,6 @@ fun HomeScreen(
             icon = Icons.Outlined.Timer
         ),
         StatCardData(
-            value = quickStats.violationsToday.toString(),
-            label = "Pelanggaran",
-            icon = Icons.Outlined.NotificationsNone
-        ),
-        StatCardData(
             value = quickStats.attendanceStatus?.takeIf { it.isNotBlank() } ?: "-",
             label = "Status Hadir",
             icon = Icons.Outlined.CalendarToday
@@ -151,6 +145,11 @@ fun HomeScreen(
     )
     val taskSummaryText = "Mulai ${taskSummary.started} • Selesai ${taskSummary.completed} • Batal ${taskSummary.cancelled}"
     val context = LocalContext.current
+
+    LaunchedEffect(violationsToday) {
+        AppBadgeNotifier.updateViolationsBadge(context, violationsToday)
+    }
+
     var hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -238,6 +237,7 @@ fun HomeScreen(
                 displayName = displayName,
                 subtitle = headerSubtitle,
                 photoUrl = state.photoUrl,
+                notificationCount = violationsToday,
                 accent = accent
             )
             Spacer(modifier = Modifier.height(18.dp))
@@ -344,6 +344,7 @@ private fun HeaderSection(
     displayName: String,
     subtitle: String,
     photoUrl: String?,
+    notificationCount: Int,
     accent: Color
 ) {
     Row(
@@ -365,18 +366,39 @@ private fun HeaderSection(
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE9F7F6)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.NotificationsNone,
-                contentDescription = "Notifications",
-                tint = accent
-            )
+        Box(modifier = Modifier.size(42.dp)) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(Color(0xFFE9F7F6)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.NotificationsNone,
+                    contentDescription = "Notifications",
+                    tint = accent
+                )
+            }
+            if (notificationCount > 0) {
+                val badgeText = if (notificationCount > 99) "99+" else notificationCount.toString()
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 2.dp, end = 2.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE11D48))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = badgeText,
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
