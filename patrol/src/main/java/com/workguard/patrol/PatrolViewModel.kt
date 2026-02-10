@@ -314,7 +314,9 @@ class PatrolViewModel @Inject constructor(
     }
 
     fun onCancelCapture() {
-        // no-op; capture view closes automatically when session ends or proceeds
+        viewModelScope.launch {
+            _events.emit(PatrolEvent.Finished)
+        }
     }
 
     fun clearError() {
