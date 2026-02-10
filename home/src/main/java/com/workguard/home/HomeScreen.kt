@@ -126,7 +126,9 @@ fun HomeScreen(
     val taskActionLabel = "Mulai Patroli"
 
     var showScheduleSheet by remember { mutableStateOf(false) }
-    val scheduleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scheduleSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
     val openScheduleSheet = remember { { showScheduleSheet = true } }
 
     val statCards = listOf(
@@ -374,7 +376,12 @@ fun HomeScreen(
     if (showScheduleSheet) {
         ModalBottomSheet(
             onDismissRequest = { showScheduleSheet = false },
-            sheetState = scheduleSheetState
+            sheetState = scheduleSheetState,
+            dragHandle = null,
+            containerColor = cardColor,
+            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            modifier = Modifier.fillMaxHeight(0.7f)
         ) {
             AllMenuBottomSheet(
                 cardColor = cardColor,
