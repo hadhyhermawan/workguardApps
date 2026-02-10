@@ -324,6 +324,7 @@ private fun WorkScheduleCalendar(
                         val schedule = daysByDate[date]
                         val shift = normalizeShiftName(schedule?.shiftName)
                         val shiftColor = resolveShiftColor(shift, accent, muted)
+                        val shiftBadge = shiftBadgeLabel(shift)
                         val isSelected = date == selectedDate
                         val isToday = date == todayDate
                         val borderColor = when {
@@ -349,21 +350,23 @@ private fun WorkScheduleCalendar(
                                 text = day.toString(),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = if (isToday || isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isToday) accent else Color(0xFF1F2A30)
+                                color = if (isToday) accent else Color(0xFF1F2A30),
+                                modifier = Modifier.align(Alignment.Center)
                             )
-                            if (shift != null) {
+                            if (shiftBadge != null) {
                                 Box(
                                     modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .clip(RoundedCornerShape(999.dp))
-                                        .background(shiftColor.copy(alpha = 0.14f))
-                                        .padding(horizontal = 7.dp, vertical = 3.dp)
+                                        .align(Alignment.TopEnd)
+                                        .size(18.dp)
+                                        .clip(CircleShape)
+                                        .background(shiftColor),
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = shift,
+                                        text = shiftBadge,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = shiftColor
+                                        color = Color.White
                                     )
                                 }
                             }
@@ -705,6 +708,17 @@ private fun resolveShiftColor(shiftName: String?, accent: Color, muted: Color): 
         normalized.contains("malam") -> Color(0xFF6366F1)
         normalized.isBlank() -> muted
         else -> accent
+    }
+}
+
+private fun shiftBadgeLabel(shiftName: String?): String? {
+    val normalized = shiftName?.trim()?.lowercase().orEmpty()
+    return when {
+        normalized.contains("pagi") -> "P"
+        normalized.contains("sore") -> "S"
+        normalized.contains("malam") -> "M"
+        normalized.isBlank() -> null
+        else -> shiftName?.trim()?.take(1)?.uppercase(Locale.getDefault())
     }
 }
 
