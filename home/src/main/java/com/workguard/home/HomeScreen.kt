@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.EventNote
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Wifi
@@ -248,7 +250,8 @@ fun HomeScreen(
                 accent = accent,
                 muted = muted,
                 onWifiClick = { openInternetConnectivitySettings(context) },
-                onBluetoothClick = { openBluetoothSettings(context) }
+                onBluetoothClick = { openBluetoothSettings(context) },
+                onDisablePauseIfUnusedClick = { openAppDetailsSettings(context) }
             )
             Spacer(modifier = Modifier.height(16.dp))
             QuickStatsSection(
@@ -522,7 +525,8 @@ private fun ConnectivityShortcutSection(
     accent: Color,
     muted: Color,
     onWifiClick: () -> Unit,
-    onBluetoothClick: () -> Unit
+    onBluetoothClick: () -> Unit,
+    onDisablePauseIfUnusedClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -550,6 +554,18 @@ private fun ConnectivityShortcutSection(
                 muted = muted,
                 onClick = onBluetoothClick
             )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ConnectivityShortcutCard(
+                title = "Jeda aplikasi",
+                subtitle = "Matikan jika tak terpakai",
+                icon = Icons.Outlined.Settings,
+                cardColor = cardColor,
+                accent = accent,
+                muted = muted,
+                onClick = onDisablePauseIfUnusedClick
+            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -1041,6 +1057,21 @@ private fun openBluetoothSettings(context: Context) {
             )
         }
     }
+}
+
+private fun openAppDetailsSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    runCatching { context.startActivity(intent) }
+        .onFailure {
+            runCatching {
+                context.startActivity(
+                    Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
+        }
 }
 
 private fun startTrackingService(context: Context) {
