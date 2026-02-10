@@ -85,7 +85,8 @@ fun PatrolScreen(
     onStartPatrol: () -> Unit,
     onPhotoCaptured: (File) -> Unit,
     onCancelCapture: () -> Unit,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     val bg = Color(0xFFF4F7F8)
     val surface = Color(0xFFFFFFFF)
@@ -148,6 +149,30 @@ fun PatrolScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+            if (onBack != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Kembali",
+                            tint = Color(0xFF1F2A30)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Patroli",
+                        color = Color(0xFF1F2A30),
+                        fontFamily = poppins,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp
+                    )
+                }
+            }
             Text(
                 text = timeText,
                 color = Color(0xFF1F2A30),
