@@ -318,6 +318,12 @@ fun ScanScreen(
                 canCheckIn -> "Absen Masuk"
                 else -> "Tidak dapat absen"
             }
+            val primaryColor = when {
+                canCheckOut -> Color(0xFFE76F51) // merah lembut untuk pulang
+                canCheckIn -> UiTokens.Accent     // hijau tema untuk masuk
+                else -> Color(0xFFDADADA)
+            }
+            val primaryTextColor = if (canCheckOut || canCheckIn) Color.White else UiTokens.Text
             val primaryOnClick = {
                 ensureLocationReady {
                     when {
@@ -336,8 +342,10 @@ fun ScanScreen(
                     .padding(horizontal = 6.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFDADADA),
-                    disabledContainerColor = Color(0xFFE4E4E4)
+                    containerColor = primaryColor,
+                    disabledContainerColor = Color(0xFFE4E4E4),
+                    contentColor = primaryTextColor,
+                    disabledContentColor = UiTokens.Muted
                 )
             ) {
                 if (state.isLoading) {
@@ -350,7 +358,7 @@ fun ScanScreen(
                 }
                 Text(
                     text = primaryLabel,
-                    color = UiTokens.Text,
+                    color = primaryTextColor,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = poppins
