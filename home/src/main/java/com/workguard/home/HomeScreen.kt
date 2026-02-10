@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -85,6 +86,9 @@ import coil.request.ImageRequest
 import com.workguard.core.notification.AppBadgeNotifier
 import com.workguard.home.data.HomeActivityItem
 import com.workguard.home.data.HomeTaskItem
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -125,6 +129,11 @@ fun HomeScreen(
     val taskCardStatus = highlightedTask?.status?.takeIf { it.isNotBlank() }
         ?: if (highlightedTask == null) "Belum ada task" else "Menunggu"
     val taskActionLabel = "Mulai Patroli"
+    val todayLabel = remember {
+        val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+        formatter.format(Calendar.getInstance().time)
+    }
+    val locationLabel = state.companyName?.takeIf { it.isNotBlank() } ?: "Lokasi belum tersedia"
 
     var showScheduleSheet by remember { mutableStateOf(false) }
     val scheduleSheetState = rememberModalBottomSheetState(
@@ -259,7 +268,9 @@ fun HomeScreen(
                 subtitle = headerSubtitle,
                 photoUrl = state.photoUrl,
                 notificationCount = violationsToday,
-                accent = accent
+                accent = accent,
+                dateLabel = todayLabel,
+                locationLabel = locationLabel
             )
             Spacer(modifier = Modifier.height(18.dp))
             QuickStatsSection(
@@ -297,7 +308,7 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
             SectionHeader(
-                title = "Today Task",
+                title = "Attendance History",
                 actionText = "See More",
                 onActionClick = onTaskClick
             )
@@ -407,7 +418,9 @@ private fun HeaderSection(
     subtitle: String,
     photoUrl: String?,
     notificationCount: Int,
-    accent: Color
+    accent: Color,
+    dateLabel: String,
+    locationLabel: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -427,6 +440,35 @@ private fun HeaderSection(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = dateLabel,
+                color = Color(0xFF6D7A7E),
+                style = MaterialTheme.typography.labelSmall
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(accent.copy(alpha = 0.14f))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.EventNote,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = locationLabel,
+                    color = Color(0xFF1F2A30),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
         Box(modifier = Modifier.size(42.dp)) {
             Box(
