@@ -46,10 +46,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.workguard.R
 import com.workguard.attendance.AttendanceState
 import com.workguard.core.util.IsoTimeUtil
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -78,7 +80,12 @@ fun ScanScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val timeFont = FontFamily.Monospace
+    val poppins = remember {
+        FontFamily(
+            Font(R.font.poppins_regular, FontWeight.Normal),
+            Font(R.font.poppins_semibold, FontWeight.SemiBold)
+        )
+    }
     val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale("id", "ID")) }
     val dateFormatter = remember { SimpleDateFormat("EEEE, dd MMM yyyy", Locale("id", "ID")) }
     val shortTimeFormatter = remember { SimpleDateFormat("HH:mm", Locale("id", "ID")) }
@@ -177,21 +184,25 @@ fun ScanScreen(
             ) {
                 Text(
                     text = timeText,
-                    style = MaterialTheme.typography.displayMedium,
-                    fontFamily = timeFont,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp,
-                    color = UiTokens.Text
+                    color = UiTokens.Text,
+                    fontFamily = poppins,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 96.sp,
+                    letterSpacing = 0.5.sp
                 )
                 Text(
                     text = dateText,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = UiTokens.Muted
+                    color = UiTokens.Muted,
+                    fontFamily = poppins,
+                    fontWeight = FontWeight.Normal
                 )
                 Text(
                     text = "Absensi harian",
                     style = MaterialTheme.typography.bodySmall,
-                    color = UiTokens.Muted
+                    color = UiTokens.Muted,
+                    fontFamily = poppins,
+                    fontWeight = FontWeight.Normal
                 )
             }
 
@@ -219,11 +230,11 @@ fun ScanScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(horizontalAlignment = Alignment.Start) {
-                            Text("Masuk", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted)
-                            Text(checkInText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text)
+                            Text("Masuk", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontFamily = poppins)
+                            Text(checkInText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text, fontFamily = poppins, fontWeight = FontWeight.SemiBold)
                             val start = state.shiftStart?.takeIf { it.isNotBlank() }
                             if (start != null) {
-                                Text(start, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp)
+                                Text(start, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp, fontFamily = poppins)
                             }
                         }
                         Box(
@@ -233,11 +244,11 @@ fun ScanScreen(
                                 .background(UiTokens.Divider)
                         )
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("Pulang", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted)
-                            Text(checkOutText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text)
+                            Text("Pulang", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontFamily = poppins)
+                            Text(checkOutText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text, fontFamily = poppins, fontWeight = FontWeight.SemiBold)
                             val end = state.shiftEnd?.takeIf { it.isNotBlank() }
                             if (end != null) {
-                                Text(end, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp)
+                                Text(end, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp, fontFamily = poppins)
                             }
                         }
                     }
@@ -256,12 +267,15 @@ fun ScanScreen(
                         Text(
                             text = state.shiftName?.takeIf { it.isNotBlank() } ?: "Shift",
                             style = MaterialTheme.typography.labelSmall,
-                            color = UiTokens.Muted
+                            color = UiTokens.Muted,
+                            fontFamily = poppins
                         )
                         Text(
                             text = scheduleText,
                             style = MaterialTheme.typography.titleMedium,
-                            color = UiTokens.Text
+                            color = UiTokens.Text,
+                            fontFamily = poppins,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -323,8 +337,8 @@ fun ScanScreen(
                     .padding(horizontal = 6.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = UiTokens.Surface,
-                    disabledContainerColor = UiTokens.Surface
+                    containerColor = Color(0xFFDADADA),
+                    disabledContainerColor = Color(0xFFE4E4E4)
                 )
             ) {
                 if (state.isLoading) {
@@ -339,7 +353,8 @@ fun ScanScreen(
                     text = primaryLabel,
                     color = UiTokens.Text,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = poppins
                 )
             }
 
