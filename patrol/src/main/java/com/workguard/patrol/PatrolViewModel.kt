@@ -289,7 +289,6 @@ class PatrolViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                selectedPoint = null,
                                 errorMessage = message,
                                 points = updatedPoints,
                                 remainingPoints = remaining,
@@ -315,7 +314,7 @@ class PatrolViewModel @Inject constructor(
     }
 
     fun onCancelCapture() {
-        _state.update { it.copy(selectedPoint = null) }
+        // no-op; capture view closes automatically when session ends or proceeds
     }
 
     fun clearError() {
