@@ -42,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -79,9 +78,6 @@ fun ScanScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val timeFont = FontFamily.Monospace
-    val gradient = Brush.verticalGradient(
-        colors = listOf(UiTokens.Soft, UiTokens.Bg)
-    )
     val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale("id", "ID")) }
     val dateFormatter = remember { SimpleDateFormat("EEEE, dd MMM yyyy", Locale("id", "ID")) }
     val shortTimeFormatter = remember { SimpleDateFormat("HH:mm", Locale("id", "ID")) }
@@ -95,7 +91,8 @@ fun ScanScreen(
     }
 
     val timeText = timeFormatter.format(Date(nowMillis))
-    val dateText = dateFormatter.format(Date(nowMillis)).lowercase(Locale("id", "ID"))
+    val dateRaw = dateFormatter.format(Date(nowMillis))
+    val dateText = dateRaw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("id", "ID")) else it.toString() }
     val checkInText = formatTime(state.checkInAt, shortTimeFormatter)
     val checkOutText = formatTime(state.checkOutAt, shortTimeFormatter)
     val scheduleText = buildScheduleText(state)
@@ -160,15 +157,16 @@ fun ScanScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradient)
+            .background(UiTokens.Bg)
             .pullRefresh(pullRefreshState)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(PaddingValues(horizontal = 20.dp, vertical = 18.dp)),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
                 modifier = Modifier
@@ -201,25 +199,70 @@ fun ScanScreen(
                 isLoading = state.isLoading
             )
 
-            Card(
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                modifier = Modifier.fillMaxWidth()
+            // Card ringkas check-in/out + shift
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Jadwal kerja",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = UiTokens.Text
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = scheduleText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = UiTokens.Muted
-                    )
+                Card(
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Text("Masuk", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted)
+                            Text(checkInText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text)
+                            val start = state.shiftStart?.takeIf { it.isNotBlank() }
+                            if (start != null) {
+                                Text(start, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp)
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(38.dp)
+                                .background(UiTokens.Divider)
+                        )
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("Pulang", style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted)
+                            Text(checkOutText, style = MaterialTheme.typography.titleMedium, color = UiTokens.Text)
+                            val end = state.shiftEnd?.takeIf { it.isNotBlank() }
+                            if (end != null) {
+                                Text(end, style = MaterialTheme.typography.labelSmall, color = UiTokens.Muted, fontSize = 11.sp)
+                            }
+                        }
+                    }
+                }
+                Card(
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = state.shiftName?.takeIf { it.isNotBlank() } ?: "Shift",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = UiTokens.Muted
+                        )
+                        Text(
+                            text = scheduleText,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = UiTokens.Text
+                        )
+                    }
                 }
             }
 
@@ -253,44 +296,50 @@ fun ScanScreen(
                 }
             }
 
-            Card(
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        StatusItem(label = "Masuk", value = checkInText)
-                        StatusItem(label = "Pulang", value = checkOutText)
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        ActionButton(
-                            label = "Absen Masuk",
-                            enabled = !state.isLoading && state.canCheckIn,
-                            isLoading = state.isLoading && state.activeAction == com.workguard.attendance.AttendanceAction.CHECK_IN,
-                            onClick = { ensureLocationReady(onCheckInClick) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ActionButton(
-                            label = "Absen Pulang",
-                            enabled = !state.isLoading && state.canCheckOut,
-                            isLoading = state.isLoading && state.activeAction == com.workguard.attendance.AttendanceAction.CHECK_OUT,
-                            onClick = { ensureLocationReady(onCheckOutClick) },
-                            modifier = Modifier.weight(1f)
-                        )
+            // Tombol aksi utama (ambil label sesuai izin)
+            val canCheckIn = state.canCheckIn
+            val canCheckOut = state.canCheckOut
+            val primaryLabel = when {
+                canCheckOut -> "Absen Pulang"
+                canCheckIn -> "Absen Masuk"
+                else -> "Tidak dapat absen"
+            }
+            val primaryOnClick = {
+                ensureLocationReady {
+                    when {
+                        canCheckOut -> onCheckOutClick()
+                        canCheckIn -> onCheckInClick()
+                        else -> Unit
                     }
                 }
+            }
+            Button(
+                onClick = primaryOnClick,
+                enabled = !state.isLoading && (canCheckIn || canCheckOut),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .padding(horizontal = 6.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = UiTokens.Surface,
+                    disabledContainerColor = UiTokens.Surface
+                )
+            ) {
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = UiTokens.Accent
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = primaryLabel,
+                    color = UiTokens.Text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -363,14 +412,14 @@ private fun AttendancePhotoCircle(
     ) {
         Card(
             shape = RoundedCornerShape(180.dp),
-            colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFDADADA)),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-            modifier = Modifier.size(220.dp)
+            modifier = Modifier.size(240.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(UiTokens.Bg, RoundedCornerShape(180.dp)),
+                    .background(Color(0xFFDADADA), RoundedCornerShape(180.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 when {
