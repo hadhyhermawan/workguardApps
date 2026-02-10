@@ -356,6 +356,26 @@ private fun FaceScanCameraPreview(
             factory = { previewView },
             modifier = Modifier.fillMaxSize()
         )
+        if (onBack != null) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+                    .size(44.dp)
+                    .background(
+                        color = accent.copy(alpha = 0.55f),
+                        shape = RoundedCornerShape(50)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBack,
+                    contentDescription = "Kembali",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
         FaceScanOverlay(
             accent = accent,
             accentDark = accentDark,
