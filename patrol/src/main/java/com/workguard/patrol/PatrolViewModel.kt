@@ -166,7 +166,7 @@ class PatrolViewModel @Inject constructor(
                         remainingPoints = null,
                         sessionComplete = false
                     )
-                    loadPatrolPoints(resetScans = true)
+                    loadPatrolPoints(resetScans = true, autoSelectFirst = true)
                 }
                 is ApiResult.Error -> {
                     val message = sessionResult.throwable.message
@@ -351,7 +351,7 @@ class PatrolViewModel @Inject constructor(
         }
     }
 
-    private fun loadPatrolPoints(resetScans: Boolean = false) {
+    private fun loadPatrolPoints(resetScans: Boolean = false, autoSelectFirst: Boolean = false) {
         viewModelScope.launch {
             when (val result = patrolRepository.getPatrolPoints()) {
                 is ApiResult.Success -> {
@@ -374,7 +374,14 @@ class PatrolViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        _state.update { it.copy(points = mapped, remainingPoints = remaining) }
+                        _state.update { current ->
+                            val nextPoint = if (autoSelectFirst) mapped.firstOrNull { !it.isScanned } else null
+                            current.copy(
+                                points = mapped,
+                                remainingPoints = remaining,
+                                selectedPoint = nextPoint ?: current.selectedPoint
+                            )
+                        }
                     }
                     saveSession(
                         taskId = state.value.taskId,
