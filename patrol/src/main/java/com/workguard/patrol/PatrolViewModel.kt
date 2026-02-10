@@ -192,27 +192,6 @@ class PatrolViewModel @Inject constructor(
         }
     }
 
-    fun onPointSelected(point: PatrolPoint) {
-        if (state.value.taskId.isNullOrBlank()) {
-            _state.update { it.copy(errorMessage = "Task patroli belum dimulai") }
-            return
-        }
-        if (state.value.patrolSessionId == null) {
-            _state.update { it.copy(errorMessage = "Sesi patroli belum aktif") }
-            return
-        }
-        if (point.isScanned) {
-            _state.update { it.copy(errorMessage = "Titik patroli ini sudah diambil.") }
-            return
-        }
-        val nextPoint = state.value.points.firstOrNull { !it.isScanned }
-        if (nextPoint != null && nextPoint.id != point.id) {
-            _state.update { it.copy(errorMessage = "Silakan lakukan patroli sesuai urutan.") }
-            return
-        }
-        _state.update { it.copy(selectedPoint = point, errorMessage = null, statusMessage = null) }
-    }
-
     fun onPhotoCaptured(photo: File) {
         val selected = state.value.selectedPoint ?: return
         val taskId = state.value.taskId ?: return

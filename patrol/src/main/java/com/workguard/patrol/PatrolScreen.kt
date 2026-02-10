@@ -67,7 +67,6 @@ import kotlin.coroutines.resumeWithException
 fun PatrolScreen(
     state: PatrolState,
     onStartPatrol: () -> Unit,
-    onPointSelected: (PatrolPoint) -> Unit,
     onPhotoCaptured: (File) -> Unit,
     onCancelCapture: () -> Unit,
     onClearError: () -> Unit
@@ -98,9 +97,9 @@ fun PatrolScreen(
             .fillMaxSize()
             .background(bg)
     ) {
-        if (state.selectedPoint != null) {
+        if (nextPoint != null) {
             PatrolCaptureScreen(
-                point = state.selectedPoint,
+                point = nextPoint,
                 isLoading = state.isLoading,
                 errorMessage = state.errorMessage,
                 onPhotoCaptured = onPhotoCaptured,
@@ -197,55 +196,10 @@ fun PatrolScreen(
                 }
             }
 
-            Text(
-                text = "Titik Patroli",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF1F2A30)
-            )
-            if (sessionActive && nextPoint != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Silakan lakukan patroli sesuai urutan. Berikutnya: ${nextPoint.name}.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
-            }
-
-            if (state.points.isEmpty()) {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Titik patroli belum tersedia. Silakan hubungi admin untuk set titik.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.weight(1f, fill = false)
-                ) {
-                    items(state.points) { point ->
-                        val isNext = nextPoint?.id == point.id
-                        PatrolPointCard(
-                            point = point,
-                            accent = accent,
-                            muted = muted,
-                            surface = surface,
-                            isSessionActive = sessionActive,
-                            isNext = isNext,
-                            onScan = { onPointSelected(point) }
-                        )
-                    }
-                }
-            }
-            }
+            // Daftar titik disembunyikan; kamera akan otomatis berjalan berurutan
         }
     }
+}
 }
 
 @Composable

@@ -9,7 +9,6 @@ data class PatrolState(
     val taskId: String? = null,
     val patrolSessionId: Long? = null,
     val points: List<PatrolPoint> = emptyList(),
-    val selectedPoint: PatrolPoint? = null,
     val completedSessions: Int = 0,
     val maxSessionsPerShift: Int = 4,
     val remainingPoints: Int? = null,
