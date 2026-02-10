@@ -614,26 +614,31 @@ private fun PatrolCameraPreview(
             modifier = Modifier.fillMaxSize()
         )
 
-        Text(
-            text = "Foto titik $pointName",
-            style = MaterialTheme.typography.labelLarge,
-            color = Color.White,
+        Row(
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 16.dp)
-        )
-
-        IconButton(
-            onClick = onCancel,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp)
-                .background(Color(0x66000000), shape = androidx.compose.foundation.shape.CircleShape)
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp)
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Close,
-                contentDescription = "Tutup",
-                tint = Color.White
+            IconButton(
+                onClick = onCancel,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color(0x66000000), shape = androidx.compose.foundation.shape.CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBack,
+                    contentDescription = "Kembali",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Foto titik $pointName",
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White
             )
         }
 
