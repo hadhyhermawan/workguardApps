@@ -217,7 +217,7 @@ fun ScanScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .height(116.dp)
+                        .height(100.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -256,7 +256,7 @@ fun ScanScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .height(116.dp)
+                        .height(100.dp)
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
