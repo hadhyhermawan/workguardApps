@@ -51,7 +51,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -59,6 +63,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.workguard.patrol.model.PatrolPoint
 import java.io.File
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -75,6 +81,24 @@ fun PatrolScreen(
     val surface = Color(0xFFFFFFFF)
     val accent = Color(0xFF16B3A8)
     val muted = Color(0xFF7A878A)
+    val poppins = remember {
+        FontFamily(
+            Font(com.workguard.navigation.R.font.poppins_regular, FontWeight.Normal),
+            Font(com.workguard.navigation.R.font.poppins_semibold, FontWeight.SemiBold)
+        )
+    }
+    val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale("id", "ID")) }
+    val dateFormatter = remember { SimpleDateFormat("EEEE, dd MMM yyyy", Locale("id", "ID")) }
+    var nowMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            nowMillis = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+    val timeText = timeFormatter.format(Date(nowMillis))
+    val dateRaw = dateFormatter.format(Date(nowMillis))
+    val dateText = dateRaw.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("id", "ID")) else it.toString() }
     val sessionActive = state.patrolSessionId != null
     val sessionLimitReached = state.completedSessions >= state.maxSessionsPerShift
     val remainingPoints = state.remainingPoints ?: state.points.count { !it.isScanned }
@@ -111,12 +135,23 @@ fun PatrolScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
             Text(
-                text = "Patroli",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF1F2A30)
+                text = timeText,
+                color = Color(0xFF1F2A30),
+                fontFamily = poppins,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 36.sp,
+                letterSpacing = 0.5.sp
+            )
+            Text(
+                text = dateText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = muted,
+                fontFamily = poppins,
+                fontWeight = FontWeight.Normal
             )
 
             if (state.errorMessage != null) {
@@ -178,10 +213,17 @@ fun PatrolScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
+                    val canStart = !state.isLoading && !sessionActive && !sessionLimitReached
+                    val btnColor = if (canStart) accent else Color(0xFFE4E4E4)
+                    val btnTextColor = if (canStart) Color.White else muted
                     Button(
                         onClick = onStartPatrol,
-                        enabled = !state.isLoading && !sessionActive && !sessionLimitReached,
-                        colors = ButtonDefaults.buttonColors(containerColor = accent)
+                        enabled = canStart,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = btnColor)
                     ) {
                         if (state.isLoading) {
                             CircularProgressIndicator(
@@ -191,7 +233,11 @@ fun PatrolScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                         }
-                        Text("Mulai/Absen Patroli")
+                        Text(
+                            text = "Mulai/Absen Patroli",
+                            color = btnTextColor,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
