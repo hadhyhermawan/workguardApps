@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.workguard.app.R
+import com.workguard.R
 import com.workguard.attendance.AttendanceState
 import com.workguard.core.util.IsoTimeUtil
 import androidx.activity.compose.rememberLauncherForActivityResult
