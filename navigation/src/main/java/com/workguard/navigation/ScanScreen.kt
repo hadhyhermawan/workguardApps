@@ -206,13 +206,13 @@ fun ScanScreen(
                     fontWeight = FontWeight.Normal
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             AttendancePhotoCircle(
                 photoUrl = resolveAttendancePhoto(state),
                 isLoading = state.isLoading
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Card ringkas check-in/out + shift
             Row(
