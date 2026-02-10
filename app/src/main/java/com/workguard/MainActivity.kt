@@ -1,9 +1,11 @@
 package com.workguard
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +27,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val ACTION_OPEN_INTERNET_CONNECTIVITY =
+            "com.workguard.action.OPEN_INTERNET_CONNECTIVITY"
+        const val ACTION_OPEN_BLUETOOTH_SETTINGS =
+            "com.workguard.action.OPEN_BLUETOOTH_SETTINGS"
+    }
+
     @Inject
     lateinit var authDataStore: AuthDataStore
     @Inject
@@ -35,6 +44,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_WorkGuard)
         super.onCreate(savedInstanceState)
+
+        if (handleConnectivityShortcut(intent)) {
+            finish()
+            return
+        }
+
         val notificationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
         val hasValidToken = authDataStore.isAccessTokenValid(clock.nowMillis())
@@ -87,6 +102,39 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
+        if (handleConnectivityShortcut(intent)) {
+            finish()
+            return
+        }
         pendingHomeRoute = NotificationRoute.routeFromIntent(intent)
+    }
+
+    private fun handleConnectivityShortcut(intent: android.content.Intent?): Boolean {
+        return when (intent?.action) {
+            ACTION_OPEN_INTERNET_CONNECTIVITY -> {
+                openInternetConnectivitySettings()
+                true
+            }
+            ACTION_OPEN_BLUETOOTH_SETTINGS -> {
+                openBluetoothSettings()
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun openInternetConnectivitySettings() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
+        } else {
+            Intent(Settings.ACTION_WIFI_SETTINGS)
+        }
+        runCatching { startActivity(intent) }
+            .onFailure { runCatching { startActivity(Intent(Settings.ACTION_SETTINGS)) } }
+    }
+
+    private fun openBluetoothSettings() {
+        runCatching { startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)) }
+            .onFailure { runCatching { startActivity(Intent(Settings.ACTION_SETTINGS)) } }
     }
 }

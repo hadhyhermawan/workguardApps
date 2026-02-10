@@ -35,6 +35,9 @@
         android:roundIcon="@mipmap/ic_launcher_logo_round"
         android:theme="@style/Theme.WorkGuard"
         android:supportsRtl="true">
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

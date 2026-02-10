@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="internet_connectivity"
+        android:enabled="true"
+        android:icon="@drawable/ic_workguard_logo"
+        android:shortcutShortLabel="Wi-Fi"
+        android:shortcutLongLabel="Ubah Wi-Fi / Internet"
+        android:shortcutDisabledMessage="Shortcut tidak tersedia">
+        <intent
+            android:action="com.workguard.action.OPEN_INTERNET_CONNECTIVITY"
+            android:targetPackage="com.workguard"
+            android:targetClass="com.workguard.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="bluetooth_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_workguard_logo"
+        android:shortcutShortLabel="Bluetooth"
+        android:shortcutLongLabel="Ubah Bluetooth"
+        android:shortcutDisabledMessage="Shortcut tidak tersedia">
+        <intent
+            android:action="com.workguard.action.OPEN_BLUETOOTH_SETTINGS"
+            android:targetPackage="com.workguard"
+            android:targetClass="com.workguard.MainActivity" />
+    </shortcut>
+</shortcuts>
+
