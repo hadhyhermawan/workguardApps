@@ -66,6 +66,7 @@ import java.io.File
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -84,8 +85,8 @@ fun PatrolScreen(
     val muted = Color(0xFF7A878A)
     val poppins = remember {
         FontFamily(
-            Font(com.workguard.R.font.poppins_regular, FontWeight.Normal),
-            Font(com.workguard.R.font.poppins_semibold, FontWeight.SemiBold)
+            Font(com.workguard.patrol.R.font.poppins_regular, FontWeight.Normal),
+            Font(com.workguard.patrol.R.font.poppins_semibold, FontWeight.SemiBold)
         )
     }
     val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale("id", "ID")) }
