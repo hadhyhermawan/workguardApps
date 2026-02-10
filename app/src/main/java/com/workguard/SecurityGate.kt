@@ -34,6 +34,8 @@ import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
 import com.workguard.core.security.DeviceSecurityChecker
 import com.workguard.core.security.FakeGpsDetector
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.security.SecureRandom
 import kotlin.coroutines.resume
@@ -52,26 +54,33 @@ fun rememberSecurityState(): State<SecurityState> {
             value = SecurityState.Allowed
             return@produceState
         }
-        val reasons = mutableListOf<String>()
+        val (reasons, showFakeGpsToast) = withContext(Dispatchers.Default) {
+            val collectedReasons = mutableListOf<String>()
 
-        val deviceCheck = DeviceSecurityChecker.check(context)
-        if (deviceCheck.isViolation) {
-            reasons.addAll(deviceCheck.reasons)
+            val deviceCheck = DeviceSecurityChecker.check(context)
+            if (deviceCheck.isViolation) {
+                collectedReasons.addAll(deviceCheck.reasons)
+            }
+
+            val fakeGpsCheck = FakeGpsDetector.check(context)
+            if (fakeGpsCheck.isViolation) {
+                collectedReasons.addAll(fakeGpsCheck.reasons)
+            }
+
+            val integrityOk = PlayIntegrityChecker(context).isIntegrityOk()
+            if (!integrityOk) {
+                collectedReasons.add("Play Integrity gagal")
+            }
+
+            collectedReasons to fakeGpsCheck.isViolation
         }
 
-        val fakeGpsCheck = FakeGpsDetector.check(context)
-        if (fakeGpsCheck.isViolation) {
-            reasons.addAll(fakeGpsCheck.reasons)
+        if (showFakeGpsToast) {
             Toast.makeText(
                 context,
                 "Anda menggunakan aplikasi terlarang",
                 Toast.LENGTH_LONG
             ).show()
-        }
-
-        val integrityOk = PlayIntegrityChecker(context).isIntegrityOk()
-        if (!integrityOk) {
-            reasons.add("Play Integrity gagal")
         }
 
         value = if (reasons.isEmpty()) {
