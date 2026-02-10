@@ -184,16 +184,6 @@ fun WorkScheduleScreen(
                         onSelectDate = { selectedDate = it }
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    WorkScheduleDayDetailCard(
-                        date = selectedDate,
-                        schedule = selectedSchedule,
-                        cardColor = cardColor,
-                        accent = accent,
-                        muted = muted
-                    )
-
                     Spacer(modifier = Modifier.height(16.dp))
                     AttendanceHistoryList(
                         items = state.history,
@@ -361,7 +351,7 @@ private fun WorkScheduleCalendar(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .size(18.dp)
+                                        .size(12.dp)
                                         .clip(CircleShape)
                                         .background(shiftColor),
                                     contentAlignment = Alignment.Center
@@ -369,8 +359,9 @@ private fun WorkScheduleCalendar(
                                     Text(
                                         text = shiftBadge,
                                         style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color.White
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontSize = MaterialTheme.typography.labelSmall.fontSize * 0.9f
                                     )
                                 }
                             }
