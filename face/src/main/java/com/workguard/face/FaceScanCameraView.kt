@@ -50,8 +50,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -513,19 +513,77 @@ private fun InwardRoundedFrame(
 ) {
     Canvas(modifier = modifier) {
         val strokePx = strokeWidth.toPx()
-        val radiusPx = cornerRadius.toPx()
         val inset = strokePx / 2f
+        val left = inset
+        val top = inset
+        val right = size.width - inset
+        val bottom = size.height - inset
+        val maxRadius = ((size.minDimension - strokePx) / 2f).coerceAtLeast(0f)
+        val r = cornerRadius.toPx().coerceAtMost(maxRadius)
+        val availableHorizontal = (right - left) - (2f * r)
+        val availableVertical = (bottom - top) - (2f * r)
+        val maxCornerLen = minOf(availableHorizontal, availableVertical).coerceAtLeast(0f) / 2f
+        val cornerLen = (size.minDimension * 0.22f).coerceIn(0f, maxCornerLen)
 
-        drawRoundRect(
+        val stroke = Stroke(
+            width = strokePx,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
+        )
+
+        fun cornerPath(builder: Path.() -> Unit): Path = Path().apply(builder)
+
+        // Top-left corner
+        drawPath(
+            path = cornerPath {
+                moveTo(left, top + r + cornerLen)
+                lineTo(left, top + r)
+                arcTo(Rect(left, top, left + (2f * r), top + (2f * r)), 180f, 90f, false)
+                lineTo(left + r + cornerLen, top)
+            },
             color = color,
-            topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
-            size = Size(size.width - strokePx, size.height - strokePx),
-            cornerRadius = CornerRadius(radiusPx, radiusPx),
-            style = Stroke(
-                width = strokePx,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round
-            )
+            style = stroke
+        )
+
+        // Top-right corner
+        drawPath(
+            path = cornerPath {
+                moveTo(right - r - cornerLen, top)
+                lineTo(right - r, top)
+                arcTo(Rect(right - (2f * r), top, right, top + (2f * r)), 270f, 90f, false)
+                lineTo(right, top + r + cornerLen)
+            },
+            color = color,
+            style = stroke
+        )
+
+        // Bottom-right corner
+        drawPath(
+            path = cornerPath {
+                moveTo(right, bottom - r - cornerLen)
+                lineTo(right, bottom - r)
+                arcTo(
+                    Rect(right - (2f * r), bottom - (2f * r), right, bottom),
+                    0f,
+                    90f,
+                    false
+                )
+                lineTo(right - r - cornerLen, bottom)
+            },
+            color = color,
+            style = stroke
+        )
+
+        // Bottom-left corner
+        drawPath(
+            path = cornerPath {
+                moveTo(left + r + cornerLen, bottom)
+                lineTo(left + r, bottom)
+                arcTo(Rect(left, bottom - (2f * r), left + (2f * r), bottom), 90f, 90f, false)
+                lineTo(left, bottom - r - cornerLen)
+            },
+            color = color,
+            style = stroke
         )
     }
 }
