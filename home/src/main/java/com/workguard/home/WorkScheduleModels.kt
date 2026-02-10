@@ -5,6 +5,8 @@ data class WorkScheduleDay(
     val shiftName: String? = null,
     val shiftStart: String? = null,
     val shiftEnd: String? = null,
+    val checkInAt: String? = null,
+    val checkOutAt: String? = null,
     val reason: String? = null
 )
 
@@ -15,4 +17,3 @@ data class WorkScheduleMonthState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
-

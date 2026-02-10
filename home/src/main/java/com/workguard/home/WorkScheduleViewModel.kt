@@ -108,6 +108,8 @@ class WorkScheduleViewModel @Inject constructor(
                             shiftName = data.shiftName,
                             shiftStart = data.shiftStart,
                             shiftEnd = data.shiftEnd,
+                            checkInAt = data.checkInAt,
+                            checkOutAt = data.checkOutAt,
                             reason = data.reason
                         )
                     }
@@ -189,4 +191,3 @@ class WorkScheduleViewModel @Inject constructor(
         }
     }
 }
-

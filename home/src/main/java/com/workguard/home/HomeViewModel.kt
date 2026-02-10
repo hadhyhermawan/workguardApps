@@ -113,6 +113,8 @@ class HomeViewModel @Inject constructor(
                                 shiftName = data.shiftName,
                                 shiftStart = data.shiftStart,
                                 shiftEnd = data.shiftEnd,
+                                checkInAt = data.checkInAt,
+                                checkOutAt = data.checkOutAt,
                                 reason = data.reason
                             ),
                             isTodayScheduleLoading = false
@@ -178,6 +180,8 @@ class HomeViewModel @Inject constructor(
                             shiftName = data.shiftName,
                             shiftStart = data.shiftStart,
                             shiftEnd = data.shiftEnd,
+                            checkInAt = data.checkInAt,
+                            checkOutAt = data.checkOutAt,
                             reason = data.reason
                         )
                     }

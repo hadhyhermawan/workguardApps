@@ -469,7 +469,12 @@ private fun DayScheduleList(
     muted: Color,
     cardColor: Color
 ) {
-    val sorted = remember(days) { days.sortedByDescending { it.date } }
+    val today = remember(days) { days.mapNotNull { it.date }.maxOrNull() ?: "" }
+    val sorted = remember(days) {
+        days
+            .filter { isPastOrToday(it.date, today) }
+            .sortedByDescending { it.date }
+    }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = "Jadwal bulan ini",
@@ -503,6 +508,8 @@ private fun DayScheduleCard(
     val shift = normalizeShiftName(day.shiftName)
     val timeRange = formatShiftRange(day.shiftStart, day.shiftEnd)
     val reason = day.reason?.trim().orEmpty()
+    val checkIn = formatTimeShort(day.checkInAt)
+    val checkOut = formatTimeShort(day.checkOutAt)
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor),
@@ -552,26 +559,65 @@ private fun DayScheduleCard(
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF1F2A30)
                         )
-                        Text(
-                            text = timeRange.ifBlank { "-" },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
-                        )
-                    }
-                    reason.isNotBlank() -> {
-                        Text(
-                            text = reason,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
-                        )
                     }
                     else -> {
                         Text(
-                            text = "Tidak ada jadwal",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = muted
+                            text = "Shift tidak tersedia",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1F2A30)
                         )
                     }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column {
+                        Text(
+                            text = "Check-in",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = muted
+                        )
+                        Text(
+                            text = checkIn.ifBlank { "--:--" },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1F2A30)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Check-out",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = muted
+                        )
+                        Text(
+                            text = checkOut.ifBlank { "--:--" },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1F2A30)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Shift",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = muted
+                        )
+                        Text(
+                            text = timeRange.ifBlank { "-" },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1F2A30)
+                        )
+                    }
+                }
+                if (reason.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = reason,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
                 }
             }
         }
@@ -611,6 +657,23 @@ private fun parseDateInfo(date: String): DateInfo {
             formattedDate = date
         )
     }
+}
+
+private fun isPastOrToday(date: String, today: String): Boolean {
+    if (date.length < 10 || today.length < 10) return true
+    return date <= today
+}
+
+private fun formatTimeShort(value: String?): String {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isBlank()) return ""
+    val millis = com.workguard.core.util.IsoTimeUtil.parseMillis(trimmed)
+    if (millis != null) {
+        val formatter = java.text.SimpleDateFormat("HH:mm", Locale("id", "ID"))
+        return formatter.format(java.util.Date(millis))
+    }
+    val regex = Regex("^\\d{2}:\\d{2}")
+    return if (regex.containsMatchIn(trimmed)) trimmed.take(5) else trimmed
 }
 
 @Composable
