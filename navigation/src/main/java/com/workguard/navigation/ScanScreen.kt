@@ -425,14 +425,10 @@ private fun AttendancePhotoCircle(
 }
 
 private fun resolveAttendancePhoto(state: AttendanceState): String? {
-    val status = state.todayStatus?.trim()?.uppercase().orEmpty()
     val checkIn = state.checkInPhotoUrl?.takeIf { it.isNotBlank() }
     val checkOut = state.checkOutPhotoUrl?.takeIf { it.isNotBlank() }
-    return when {
-        status.contains("CHECKED_OUT") -> checkOut ?: checkIn
-        status.contains("CHECKED_IN") -> checkIn ?: checkOut
-        else -> checkOut ?: checkIn
-    }
+    // Always prioritise foto absen pulang jika ada
+    return checkOut ?: checkIn
 }
 
 private fun formatTime(value: String?, formatter: SimpleDateFormat): String {
