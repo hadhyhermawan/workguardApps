@@ -664,13 +664,13 @@ private data class DateInfo(
 )
 
 private fun parseDateInfo(date: String): DateInfo {
-    // Expects yyyy-MM-dd
+    // Accepts yyyy-MM-dd or ISO strings, normalizes to local calendar
     val cal = Calendar.getInstance()
+    val clean = if (date.length >= 10) date.substring(0, 10) else date
     return try {
-        val parts = date.split("-")
-        val year = parts.getOrNull(0)?.toIntOrNull() ?: 1970
-        val month = parts.getOrNull(1)?.toIntOrNull()?.minus(1) ?: 0
-        val day = parts.getOrNull(2)?.toIntOrNull() ?: 1
+        val year = clean.substring(0, 4).toInt()
+        val month = clean.substring(5, 7).toInt() - 1
+        val day = clean.substring(8, 10).toInt()
         cal.set(year, month, day)
         val dayName = cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale("id", "ID"))
             ?.replaceFirstChar { it.uppercase() }
@@ -687,7 +687,7 @@ private fun parseDateInfo(date: String): DateInfo {
         DateInfo(
             dayOfMonth = "--",
             dayOfWeek = "Day",
-            formattedDate = date
+            formattedDate = clean.ifBlank { date }
         )
     }
 }
