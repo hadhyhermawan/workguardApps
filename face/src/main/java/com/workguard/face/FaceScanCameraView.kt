@@ -19,6 +19,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -84,6 +85,7 @@ internal fun FaceScanCameraView(
     textColor: Color,
     muted: Color,
     captureSignal: Long,
+    onBack: (() -> Unit)? = null,
     onFaceDetected: (Boolean) -> Unit,
     onFaceCount: (Int) -> Unit,
     onPhotoCaptured: (File?, String?) -> Unit
@@ -126,6 +128,7 @@ internal fun FaceScanCameraView(
         surface = surface,
         textColor = textColor,
         captureSignal = captureSignal,
+        onBack = onBack,
         onFaceDetected = onFaceDetected,
         onFaceCount = onFaceCount,
         onPhotoCaptured = onPhotoCaptured
@@ -140,6 +143,7 @@ private fun FaceScanCameraPreview(
     surface: Color,
     textColor: Color,
     captureSignal: Long,
+    onBack: (() -> Unit)?,
     onFaceDetected: (Boolean) -> Unit,
     onFaceCount: (Int) -> Unit,
     onPhotoCaptured: (File?, String?) -> Unit
@@ -355,7 +359,8 @@ private fun FaceScanCameraPreview(
         FaceScanOverlay(
             accent = accent,
             accentDark = accentDark,
-            faceDetected = faceDetected
+            faceDetected = faceDetected,
+            onBack = onBack
         )
         if (cameraError != null) {
             FaceScanCameraError(
@@ -471,7 +476,8 @@ private fun applyExifRotation(bitmap: Bitmap, path: String): Bitmap {
 private fun FaceScanOverlay(
     accent: Color,
     accentDark: Color,
-    faceDetected: Boolean
+    faceDetected: Boolean,
+    onBack: (() -> Unit)? = null
 ) {
     val ringColor = if (faceDetected) accent else accentDark
     Box(modifier = Modifier.fillMaxSize()) {
@@ -489,12 +495,19 @@ private fun FaceScanOverlay(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Outlined.VerifiedUser,
-                contentDescription = null,
-                tint = accent
-            )
-            Spacer(modifier = Modifier.width(6.dp))
+            if (onBack != null) {
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBack,
+                    contentDescription = "Kembali",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(color = accent.copy(alpha = 0.4f), shape = RoundedCornerShape(50))
+                        .padding(2.dp)
+                        .clickable { onBack() }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
             Text(
                 text = if (faceDetected) "Wajah terdeteksi" else "Arahkan wajah",
                 style = MaterialTheme.typography.labelSmall,

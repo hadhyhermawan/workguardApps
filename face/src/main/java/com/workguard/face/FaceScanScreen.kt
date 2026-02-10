@@ -40,7 +40,8 @@ import java.io.File
 @Composable
 fun FaceScanScreen(
     state: FaceScanState,
-    onConfirmScan: (CameraFacing, File) -> Unit
+    onConfirmScan: (CameraFacing, File) -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
     val accent = Color(0xFF16B3A8)
     val accentDark = Color(0xFF0E8C84)
@@ -65,6 +66,7 @@ fun FaceScanScreen(
             textColor = textColor,
             muted = muted,
             captureSignal = captureSignal,
+            onBack = onBack,
             onFaceDetected = { detected -> faceDetected = detected },
             onFaceCount = { count -> faceCount = count },
             onPhotoCaptured = { file, error ->

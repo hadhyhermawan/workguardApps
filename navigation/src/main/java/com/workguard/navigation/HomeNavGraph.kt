@@ -355,7 +355,8 @@ fun HomeNavGraph(
 
                 FaceScanScreen(
                     state = state,
-                    onConfirmScan = viewModel::onConfirmScan
+                    onConfirmScan = viewModel::onConfirmScan,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }
