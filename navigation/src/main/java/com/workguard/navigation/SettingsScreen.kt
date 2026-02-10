@@ -64,7 +64,10 @@ import androidx.compose.ui.unit.dp
 fun SettingsScreen(
     onLogout: () -> Unit,
     onFaceEnrollmentClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onPrivacyDataClick: () -> Unit,
+    onPolicyClick: () -> Unit,
+    onHelpClick: () -> Unit
 ) {
     val context = LocalContext.current
     var notificationsEnabled by remember { mutableStateOf(true) }
@@ -173,7 +176,8 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Outlined.Security,
                     title = "Privasi data",
-                    subtitle = "Kelola izin dan akses"
+                    subtitle = "Kelola izin dan akses",
+                    onClick = onPrivacyDataClick
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ChevronRight,
@@ -277,7 +281,8 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.Outlined.PrivacyTip,
                     title = "Kebijakan",
-                    subtitle = "Syarat dan ketentuan"
+                    subtitle = "Syarat dan ketentuan",
+                    onClick = onPolicyClick
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ChevronRight,
@@ -290,7 +295,8 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = Icons.AutoMirrored.Outlined.HelpOutline,
                     title = "Bantuan",
-                    subtitle = "Pusat bantuan dan kontak"
+                    subtitle = "Pusat bantuan dan kontak",
+                    onClick = onHelpClick
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ChevronRight,
@@ -313,6 +319,242 @@ fun SettingsScreen(
     }
 }
 
+@Composable
+fun PrivacyDataScreen() {
+    val context = LocalContext.current
+    val headerFont = FontFamily.Serif
+    val gradient = Brush.verticalGradient(
+        colors = listOf(UiTokens.Soft, UiTokens.Bg)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column {
+                    Text(
+                        text = "Privasi data",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = headerFont,
+                        fontWeight = FontWeight.SemiBold,
+                        color = UiTokens.Text
+                    )
+                    Text(
+                        text = "Kelola izin dan akses aplikasi.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UiTokens.Muted
+                    )
+                }
+            }
+
+            item { SectionHeader(title = "Izin aplikasi") }
+
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Settings,
+                    title = "Info aplikasi",
+                    subtitle = "Izin, baterai, dan penyimpanan",
+                    onClick = { openAppDetailsSettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Notifications,
+                    title = "Notifikasi aplikasi",
+                    subtitle = "Atur izin notifikasi",
+                    onClick = { openAppNotificationSettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Security,
+                    title = "Lokasi perangkat",
+                    subtitle = "Aktifkan GPS bila diperlukan",
+                    onClick = { openLocationSettings(context) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ChevronRight,
+                        contentDescription = null,
+                        tint = UiTokens.Muted
+                    )
+                }
+            }
+
+            item { SectionHeader(title = "Catatan") }
+            item {
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Beberapa pengaturan privasi berada di menu sistem Android dan bisa berbeda tergantung tipe perangkat.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = UiTokens.Muted
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PolicyScreen() {
+    val headerFont = FontFamily.Serif
+    val gradient = Brush.verticalGradient(
+        colors = listOf(UiTokens.Soft, UiTokens.Bg)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column {
+                    Text(
+                        text = "Kebijakan",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = headerFont,
+                        fontWeight = FontWeight.SemiBold,
+                        color = UiTokens.Text
+                    )
+                    Text(
+                        text = "Syarat dan ketentuan penggunaan.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UiTokens.Muted
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Dokumen kebijakan akan ditampilkan di halaman ini.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = UiTokens.Text
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Jika perusahaan kamu memiliki dokumen resmi (PDF/URL), kirimkan ke tim dev agar bisa ditautkan di aplikasi.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = UiTokens.Muted
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HelpScreen() {
+    val headerFont = FontFamily.Serif
+    val gradient = Brush.verticalGradient(
+        colors = listOf(UiTokens.Soft, UiTokens.Bg)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column {
+                    Text(
+                        text = "Bantuan",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = headerFont,
+                        fontWeight = FontWeight.SemiBold,
+                        color = UiTokens.Text
+                    )
+                    Text(
+                        text = "Pusat bantuan dan kontak.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = UiTokens.Muted
+                    )
+                }
+            }
+
+            item { SectionHeader(title = "Panduan") }
+            item {
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "1. Pastikan GPS aktif untuk absensi.\n2. Pastikan notifikasi diizinkan agar badge pelanggaran tampil.\n3. Jika scan wajah gagal, pastikan cahaya cukup dan wajah berada di frame.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = UiTokens.Muted
+                        )
+                    }
+                }
+            }
+
+            item { SectionHeader(title = "Kontak") }
+            item {
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = UiTokens.Surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Untuk bantuan lebih lanjut, hubungi admin perusahaan atau tim support.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = UiTokens.Muted
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 private fun openInternetConnectivitySettings(context: Context) {
     val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         Intent(AndroidSettings.Panel.ACTION_INTERNET_CONNECTIVITY)
@@ -325,6 +567,26 @@ private fun openInternetConnectivitySettings(context: Context) {
 
 private fun openBluetoothSettings(context: Context) {
     runCatching { context.startActivity(Intent(AndroidSettings.ACTION_BLUETOOTH_SETTINGS)) }
+        .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
+}
+
+private fun openAppNotificationSettings(context: Context) {
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(AndroidSettings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(AndroidSettings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+    } else {
+        Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+        }
+    }
+    runCatching { context.startActivity(intent) }
+        .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
+}
+
+private fun openLocationSettings(context: Context) {
+    val intent = Intent(AndroidSettings.ACTION_LOCATION_SOURCE_SETTINGS)
+    runCatching { context.startActivity(intent) }
         .onFailure { runCatching { context.startActivity(Intent(AndroidSettings.ACTION_SETTINGS)) } }
 }
 

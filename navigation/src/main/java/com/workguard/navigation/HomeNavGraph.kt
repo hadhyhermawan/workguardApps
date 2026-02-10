@@ -64,6 +64,9 @@ fun HomeNavGraph(
             Routes.News -> "News"
             Routes.NewsDetail -> "News"
             Routes.Settings -> "Settings"
+            Routes.PrivacyData -> "Privasi data"
+            Routes.Policy -> "Kebijakan"
+            Routes.Help -> "Bantuan"
             Routes.FaceEnroll -> "Pendaftaran Wajah"
             Routes.FaceEnrollCapture -> "Pendaftaran Wajah"
             Routes.Profile -> "Profil"
@@ -256,8 +259,23 @@ fun HomeNavGraph(
                 SettingsScreen(
                     onLogout = onLogout,
                     onFaceEnrollmentClick = { navController.navigate(Routes.FaceEnroll) },
-                    onProfileClick = { navController.navigate(Routes.Profile) }
+                    onProfileClick = { navController.navigate(Routes.Profile) },
+                    onPrivacyDataClick = { navController.navigate(Routes.PrivacyData) },
+                    onPolicyClick = { navController.navigate(Routes.Policy) },
+                    onHelpClick = { navController.navigate(Routes.Help) }
                 )
+            }
+
+            composable(Routes.PrivacyData) {
+                PrivacyDataScreen()
+            }
+
+            composable(Routes.Policy) {
+                PolicyScreen()
+            }
+
+            composable(Routes.Help) {
+                HelpScreen()
             }
 
             composable(Routes.Profile) {
