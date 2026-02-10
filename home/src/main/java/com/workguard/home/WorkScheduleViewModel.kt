@@ -175,6 +175,23 @@ class WorkScheduleViewModel @Inject constructor(
                         historyError = null
                     )
                 }
+            } catch (e: HttpException) {
+                if (e.code() == 404) {
+                    _state.update { st ->
+                        st.copy(
+                            history = emptyList(),
+                            isHistoryLoading = false,
+                            historyError = null
+                        )
+                    }
+                } else {
+                    _state.update { st ->
+                        st.copy(
+                            isHistoryLoading = false,
+                            historyError = e.message()
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _state.update { st ->
                     st.copy(
