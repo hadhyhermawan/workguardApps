@@ -646,8 +646,15 @@ private fun PatrolCameraPreview(
             )
         }
 
-        val showSuccess = !isCapturing && !isLoading && cameraError == null && errorMessage == null &&
-            successMessage?.contains("Berhasil", ignoreCase = true) == true
+        var showSuccess by remember { mutableStateOf(false) }
+
+        LaunchedEffect(successMessage) {
+            if (successMessage?.contains("Berhasil", ignoreCase = true) == true) {
+                showSuccess = true
+                delay(900)
+                showSuccess = false
+            }
+        }
 
         if (cameraError != null) {
             InfoCard(
