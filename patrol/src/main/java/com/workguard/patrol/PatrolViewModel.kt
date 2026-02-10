@@ -257,7 +257,6 @@ class PatrolViewModel @Inject constructor(
                             remainingPoints = finalRemaining,
                             sessionComplete = sessionComplete,
                             patrolSessionId = if (sessionComplete) null else it.patrolSessionId,
-                            selectedPoint = if (!sessionComplete) nextPoint else null,
                             completedSessions = newCompletedSessions
                         )
                     }
@@ -271,9 +270,6 @@ class PatrolViewModel @Inject constructor(
                     )
                     if (sessionComplete) {
                         _events.emit(PatrolEvent.Finished)
-                    } else if (nextPoint != null) {
-                        // auto buka kamera titik berikutnya
-                        _state.update { it.copy(selectedPoint = nextPoint) }
                     }
                 }
                 is ApiResult.Error -> {
