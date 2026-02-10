@@ -74,7 +74,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.offset
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.Lifecycle
@@ -124,56 +126,12 @@ fun HomeScreen(
     val taskSummary = state.todayTaskSummary
     val quickStats = state.quickStats
     val violationsToday = quickStats.violationsToday
-    val highlightedTask = todayTasks.firstOrNull()
-    val taskCardTitle = highlightedTask?.title?.takeIf { it.isNotBlank() } ?: "Task Patroli"
-    val taskCardSchedule = highlightedTask?.let { formatTaskSchedule(it) } ?: "Jadwal belum tersedia"
-    val taskCardStatus = highlightedTask?.status?.takeIf { it.isNotBlank() }
-        ?: if (highlightedTask == null) "Belum ada task" else "Menunggu"
-    val taskActionLabel = "Mulai Patroli"
     val todayLabel = remember {
         val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
         formatter.format(Calendar.getInstance().time)
     }
     val locationLabel = state.companyName?.takeIf { it.isNotBlank() } ?: "Lokasi belum tersedia"
 
-    var showScheduleSheet by remember { mutableStateOf(false) }
-    val scheduleSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
-    val openScheduleSheet = remember { { showScheduleSheet = true } }
-
-    val statCards = listOf(
-        StatCardData(
-            value = formatQuickTime(quickStats.checkInAt),
-            label = "Check In",
-            icon = Icons.Outlined.PlayArrow,
-            onClick = openScheduleSheet
-        ),
-        StatCardData(
-            value = formatQuickTime(quickStats.checkOutAt),
-            label = "Check Out",
-            icon = Icons.Outlined.Stop,
-            onClick = openScheduleSheet
-        ),
-        StatCardData(
-            value = quickStats.pendingPermits.toString(),
-            label = "Tidak Hadir",
-            icon = Icons.Outlined.EventNote,
-            onClick = openScheduleSheet
-        ),
-        StatCardData(
-            value = quickStats.pendingOvertimes.toString(),
-            label = "Total Kehadiran",
-            icon = Icons.Outlined.CalendarToday,
-            onClick = openScheduleSheet
-        ),
-        StatCardData(
-            value = quickStats.attendanceStatus?.takeIf { it.isNotBlank() } ?: "-",
-            label = "Status Hadir",
-            icon = Icons.Outlined.CalendarToday,
-            onClick = openScheduleSheet
-        )
-    )
     val taskSummaryText = "Mulai ${taskSummary.started} • Selesai ${taskSummary.completed} • Batal ${taskSummary.cancelled}"
     val context = LocalContext.current
 
@@ -196,6 +154,9 @@ fun HomeScreen(
     var isLocationEnabled by remember {
         mutableStateOf(checkLocationEnabled(context))
     }
+    var showScheduleSheet by remember { mutableStateOf(false) }
+    val scheduleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val openScheduleSheet = remember { { showScheduleSheet = true } }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { result ->
@@ -263,102 +224,115 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            HeaderSection(
-                initials = initials,
-                displayName = displayName,
-                subtitle = headerSubtitle,
-                photoUrl = state.photoUrl,
-                notificationCount = violationsToday,
-                accent = accent
-            )
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Avatar(displayName, initials, state.photoUrl, size = 56.dp)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = headerSubtitle,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = muted
+                    )
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF1F2A30)
+                    )
+                }
+                NotificationBell(count = violationsToday, accent = accent, onClick = onTaskClick)
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(todayLabel, style = MaterialTheme.typography.labelMedium, color = muted)
+                Text(locationLabel, style = MaterialTheme.typography.labelMedium, color = muted, textAlign = TextAlign.End)
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                InfoPill(
+                    title = "Masuk",
+                    value = formatQuickTime(quickStats.checkInAt),
+                    accent = accent,
+                    cardColor = cardColor,
+                    muted = muted,
+                    modifier = Modifier.weight(1f)
+                )
+                InfoPill(
+                    title = "Pulang",
+                    value = formatQuickTime(quickStats.checkOutAt),
+                    accent = accent,
+                    cardColor = cardColor,
+                    muted = muted,
+                    modifier = Modifier.weight(1f)
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
-            DateLocationRow(
-                dateLabel = todayLabel,
-                locationLabel = locationLabel,
-                accent = accent
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatBadge(
+                    value = "${quickStats.pendingPermits}",
+                    label = "Tidak Hadir",
+                    icon = Icons.Outlined.EventNote,
+                    accent = accent,
+                    muted = muted,
+                    cardColor = cardColor,
+                    modifier = Modifier.weight(1f)
+                )
+                StatBadge(
+                    value = "${quickStats.pendingOvertimes}",
+                    label = "Kehadiran",
+                    icon = Icons.Outlined.CalendarToday,
+                    accent = accent,
+                    muted = muted,
+                    cardColor = cardColor,
+                    modifier = Modifier.weight(1f)
+                )
+            }
             Spacer(modifier = Modifier.height(18.dp))
-            QuickStatsGrid(
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                stats = statCards.take(4), // Check in/out, izin, lembur
-                statusCard = statCards.getOrNull(4)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
             AllMenuCard(
                 cardColor = cardColor,
                 accent = accent,
                 muted = muted,
                 onClick = openScheduleSheet
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            WorkHoursCard(
-                cardColor = cardColor,
-                accent = accent,
-                muted = muted,
-                schedule = state.todaySchedule,
-                isLoading = state.isTodayScheduleLoading,
-                onClick = openScheduleSheet
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            TaskHighlightCard(
-                title = taskCardTitle,
-                schedule = taskCardSchedule,
-                status = taskCardStatus,
-                actionLabel = taskActionLabel,
-                accent = accent,
-                muted = muted,
-                cardColor = cardColor,
-                onClick = onTaskClick
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            SectionHeader(
-                title = "Attendance History",
-                actionText = "See More",
-                onActionClick = onTaskClick
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             Text(
-                text = taskSummaryText,
-                color = muted,
-                style = MaterialTheme.typography.bodySmall
+                text = "Patroli Hari Ini",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color(0xFF1F2A30)
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             if (todayTasks.isEmpty()) {
-                EmptyStateCard(text = "Belum ada tugas hari ini.")
+                EmptyStateCard(text = "Belum ada jadwal patroli.")
             } else {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(end = 12.dp)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(todayTasks) { task ->
-                        TaskCard(
-                            data = TaskCardData(
-                                title = task.title?.takeIf { it.isNotBlank() } ?: "Tugas",
-                                date = formatTaskSchedule(task),
-                                description = task.description?.takeIf { it.isNotBlank() }
-                                    ?: task.status?.takeIf { it.isNotBlank() }
-                                    ?: "-"
-                            ),
-                            accent = accent,
-                            cardColor = cardColor,
-                            onClick = onTaskClick
-                        )
+                        PatrolTaskChip(task = task, accent = accent, cardColor = cardColor, muted = muted)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            SectionHeader(
-                title = "Recent Activity",
-                actionText = "View all",
-                onActionClick = onTaskClick
+            Spacer(modifier = Modifier.height(18.dp))
+            Text(
+                text = "Aktivitas Terkini",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color(0xFF1F2A30)
             )
             Spacer(modifier = Modifier.height(12.dp))
             if (recentActivities.isEmpty()) {
                 EmptyStateCard(text = "Belum ada aktivitas terbaru.")
             } else {
-                recentActivities.forEach { activity ->
+                recentActivities.take(5).forEach { activity ->
                     ActivityRow(
                         data = ActivityData(
                             title = activity.title?.takeIf { it.isNotBlank() } ?: "Aktivitas",
@@ -377,10 +351,9 @@ fun HomeScreen(
                         cardColor = cardColor,
                         muted = muted
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
         }
         PullRefreshIndicator(
             refreshing = state.isLoading,
@@ -486,12 +459,13 @@ private fun HeaderSection(
 @Composable
 private fun ProfileAvatar(
     photoUrl: String?,
-    initials: String
+    initials: String,
+    size: Dp = 48.dp
 ) {
     val avatarBackground = Color(0xFF1F2A30)
     Box(
         modifier = Modifier
-            .size(48.dp)
+            .size(size)
             .clip(CircleShape)
             .background(avatarBackground),
         contentAlignment = Alignment.Center
@@ -679,6 +653,96 @@ private fun QuickStatsGrid(
                 cardColor = cardColor,
                 accent = accent,
                 muted = muted
+            )
+        }
+    }
+}
+
+@Composable
+private fun Avatar(name: String, initials: String, photoUrl: String?, size: Dp) {
+    ProfileAvatar(photoUrl = photoUrl, initials = initials, size = size)
+}
+
+@Composable
+private fun NotificationBell(count: Int, accent: Color, onClick: () -> Unit) {
+    Box {
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = Icons.Outlined.NotificationsNone,
+                contentDescription = "Notifikasi",
+                tint = Color(0xFF1F2A30)
+            )
+        }
+        if (count > 0) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = 4.dp)
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE74C3C)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = count.toString(),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoPill(
+    title: String,
+    value: String,
+    accent: Color,
+    cardColor: Color,
+    muted: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = value.ifBlank { "--:--" },
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color(0xFF1F2A30)
+            )
+            Text(text = title, style = MaterialTheme.typography.bodySmall, color = muted)
+        }
+    }
+}
+
+@Composable
+private fun PatrolTaskChip(task: HomeTaskItem, accent: Color, cardColor: Color, muted: Color) {
+    val time = formatTaskSchedule(task)
+    Card(
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = task.title?.takeIf { it.isNotBlank() } ?: "Patroli",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color(0xFF1F2A30)
+            )
+            Text(
+                text = time,
+                style = MaterialTheme.typography.bodySmall,
+                color = muted
             )
         }
     }
