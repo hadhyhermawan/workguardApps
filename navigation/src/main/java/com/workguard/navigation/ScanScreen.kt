@@ -508,9 +508,8 @@ private fun formatShiftTime(value: String?): String? {
 private fun buildScheduleText(state: AttendanceState): String {
     val start = formatShiftTime(state.shiftStart)
     val end = formatShiftTime(state.shiftEnd)
-    val name = state.shiftName?.takeIf { it.isNotBlank() } ?: "Shift"
     return if (!start.isNullOrBlank() && !end.isNullOrBlank()) {
-        "$name - $start - $end"
+        "$start - $end"
     } else {
         "Jadwal belum tersedia"
     }
