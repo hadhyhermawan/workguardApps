@@ -157,14 +157,14 @@ fun HomeScreen(
         ),
         StatCardData(
             value = quickStats.pendingPermits.toString(),
-            label = "Izin Pending",
+            label = "Tidak Hadir",
             icon = Icons.Outlined.EventNote,
             onClick = openScheduleSheet
         ),
         StatCardData(
             value = quickStats.pendingOvertimes.toString(),
-            label = "Lembur Pending",
-            icon = Icons.Outlined.Timer,
+            label = "Total Kehadiran",
+            icon = Icons.Outlined.CalendarToday,
             onClick = openScheduleSheet
         ),
         StatCardData(
@@ -269,9 +269,13 @@ fun HomeScreen(
                 subtitle = headerSubtitle,
                 photoUrl = state.photoUrl,
                 notificationCount = violationsToday,
-                accent = accent,
+                accent = accent
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            DateLocationRow(
                 dateLabel = todayLabel,
-                locationLabel = locationLabel
+                locationLabel = locationLabel,
+                accent = accent
             )
             Spacer(modifier = Modifier.height(18.dp))
             QuickStatsGrid(
@@ -420,9 +424,7 @@ private fun HeaderSection(
     subtitle: String,
     photoUrl: String?,
     notificationCount: Int,
-    accent: Color,
-    dateLabel: String,
-    locationLabel: String
+    accent: Color
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -443,39 +445,6 @@ private fun HeaderSection(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = dateLabel,
-                    color = Color(0xFF6D7A7E),
-                    style = MaterialTheme.typography.labelSmall
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(accent.copy(alpha = 0.14f))
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.LocationOn,
-                        contentDescription = null,
-                        tint = accent,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = locationLabel,
-                        color = Color(0xFF1F2A30),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
         }
         Box(modifier = Modifier.size(42.dp)) {
             Box(
@@ -559,6 +528,50 @@ private fun ProfileAvatar(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DateLocationRow(
+    dateLabel: String,
+    locationLabel: String,
+    accent: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = dateLabel,
+            color = Color(0xFF6D7A7E),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.weight(1f)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(RoundedCornerShape(999.dp))
+                .background(accent.copy(alpha = 0.14f))
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = "Lokasi",
+                tint = accent,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = locationLabel,
+                color = Color(0xFF1F2A30),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
