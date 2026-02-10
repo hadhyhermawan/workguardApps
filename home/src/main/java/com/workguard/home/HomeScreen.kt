@@ -329,31 +329,12 @@ fun HomeScreen(
                 color = Color(0xFF1F2A30)
             )
             Spacer(modifier = Modifier.height(12.dp))
-            if (recentActivities.isEmpty()) {
-                EmptyStateCard(text = "Belum ada aktivitas terbaru.")
-            } else {
-                recentActivities.take(5).forEach { activity ->
-                    ActivityRow(
-                        data = ActivityData(
-                            title = activity.title?.takeIf { it.isNotBlank() } ?: "Aktivitas",
-                            date = activity.date?.takeIf { it.isNotBlank() } ?: "-",
-                            time = activity.time?.takeIf { it.isNotBlank() } ?: "-",
-                            status = activity.status?.takeIf { it.isNotBlank() } ?: "-",
-                            statusColor = resolveActivityStatusColor(
-                                statusColor = activity.statusColor,
-                                status = activity.status,
-                                accent = accent,
-                                muted = muted
-                            ),
-                            icon = resolveActivityIcon(activity)
-                        ),
-                        accent = accent,
-                        cardColor = cardColor,
-                        muted = muted
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-            }
+            ActivityCompactList(
+                activities = recentActivities,
+                accent = accent,
+                cardColor = cardColor,
+                muted = muted
+            )
         }
         PullRefreshIndicator(
             refreshing = state.isLoading,
@@ -678,15 +659,15 @@ private fun NotificationBell(count: Int, accent: Color, onClick: () -> Unit) {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = 4.dp, y = 4.dp)
-                    .size(18.dp)
+                    .size(20.dp)
                     .clip(CircleShape)
                     .background(Color(0xFFE74C3C)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = count.toString(),
+                    text = count.coerceAtMost(99).toString(),
                     color = Color.White,
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
                 )
             }
         }
@@ -708,16 +689,29 @@ private fun InfoPill(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = value.ifBlank { "--:--" },
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = Color(0xFF1F2A30)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = value.ifBlank { "--:--" },
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color(0xFF1F2A30)
+                )
+                Text(text = title, style = MaterialTheme.typography.bodySmall, color = muted)
+            }
+            Box(
+                modifier = Modifier
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF1F3F4))
             )
-            Text(text = title, style = MaterialTheme.typography.bodySmall, color = muted)
         }
     }
 }
@@ -1406,6 +1400,52 @@ private fun ActivityRow(
                     style = MaterialTheme.typography.bodySmall,
                     color = data.statusColor
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActivityCompactList(
+    activities: List<HomeActivityItem>,
+    accent: Color,
+    cardColor: Color,
+    muted: Color
+) {
+    if (activities.isEmpty()) {
+        EmptyStateCard(text = "Belum ada aktivitas terbaru.")
+        return
+    }
+    val first = activities.first()
+    val date = first.date?.takeIf { it.isNotBlank() } ?: "--"
+    val checkIn = first.time?.takeIf { it.isNotBlank() } ?: "--"
+    val checkOut = first.status?.takeIf { it.isNotBlank() } ?: "--"
+    Card(
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFE7F0F4)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = date, color = Color(0xFF1F2A30), style = MaterialTheme.typography.labelMedium)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text("Masuk $checkIn", style = MaterialTheme.typography.bodySmall, color = Color(0xFF1F2A30))
+                    Text("Pulang $checkOut", style = MaterialTheme.typography.bodySmall, color = Color(0xFF1F2A30))
+                }
+                Text("Total Jam ${first.statusColor ?: "--"}", style = MaterialTheme.typography.bodySmall, color = muted)
             }
         }
     }
