@@ -699,6 +699,23 @@ private fun PatrolCameraPreview(
         ) {
             Text(if (isLoading) "Mengirim..." else "Ambil Foto")
         }
+
+        if (!isCapturing && !isLoading && cameraError == null && errorMessage == null && state.statusMessage?.contains("Berhasil", ignoreCase = true) == true) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(96.dp)
+                    .background(Color(0x8000C853), shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircle,
+                    contentDescription = "Berhasil",
+                    tint = Color.White,
+                    modifier = Modifier.size(56.dp)
+                )
+            }
+        }
     }
 }
 
