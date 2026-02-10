@@ -196,6 +196,7 @@ fun WorkScheduleScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     DayScheduleList(
                         days = monthState.days,
+                        todayDate = state.todayDate,
                         accent = accent,
                         muted = muted,
                         cardColor = cardColor
@@ -465,19 +466,19 @@ private fun WorkScheduleDayDetailCard(
 @Composable
 private fun DayScheduleList(
     days: List<WorkScheduleDay>,
+    todayDate: String,
     accent: Color,
     muted: Color,
     cardColor: Color
 ) {
-    val today = remember(days) { days.mapNotNull { it.date }.maxOrNull() ?: "" }
     val sorted = remember(days) {
         days
-            .filter { isPastOrToday(it.date, today) }
+            .filter { isPastOrToday(it.date, todayDate) }
             .sortedByDescending { it.date }
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            text = "Jadwal bulan ini",
+            text = "Riwayat kehadiran",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF1F2A30)
