@@ -38,6 +38,7 @@ import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Stop
@@ -441,33 +442,38 @@ private fun HeaderSection(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = dateLabel,
-                color = Color(0xFF6D7A7E),
-                style = MaterialTheme.typography.labelSmall
-            )
-            Spacer(modifier = Modifier.height(6.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(accent.copy(alpha = 0.14f))
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.EventNote,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = locationLabel,
-                    color = Color(0xFF1F2A30),
+                    text = dateLabel,
+                    color = Color(0xFF6D7A7E),
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold
+                    modifier = Modifier.weight(1f)
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(accent.copy(alpha = 0.14f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = locationLabel,
+                        color = Color(0xFF1F2A30),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
         Box(modifier = Modifier.size(42.dp)) {
