@@ -640,7 +640,6 @@ private fun LocationServicesCard(
 }
 
 @Composable
-@Composable
 private fun QuickStatsGrid(
     cardColor: Color,
     accent: Color,
