@@ -257,7 +257,8 @@ fun AppNavGraph(
                 onStartPatrol = viewModel::onStartPatrolRequested,
                 onPhotoCaptured = viewModel::onPhotoCaptured,
                 onCancelCapture = viewModel::onCancelCapture,
-                onClearError = viewModel::clearError
+                onClearError = viewModel::clearError,
+                onBack = { navController.navigateUp() }
             )
         }
 
