@@ -192,7 +192,7 @@ class PatrolViewModel @Inject constructor(
     }
 
     fun onPhotoCaptured(photo: File) {
-        val selected = state.value.selectedPoint ?: return
+        val selected = state.value.points.firstOrNull { !it.isScanned } ?: return
         val taskId = state.value.taskId ?: return
         val patrolSessionId = state.value.patrolSessionId
         if (patrolSessionId == null) {
