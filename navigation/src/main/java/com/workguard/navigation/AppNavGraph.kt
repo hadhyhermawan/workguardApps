@@ -246,6 +246,8 @@ fun AppNavGraph(
                 viewModel.events.collect { event ->
                     if (event is com.workguard.patrol.PatrolEvent.RequireFaceScan) {
                         navController.navigate(Routes.faceScan(event.context))
+                    } else if (event is com.workguard.patrol.PatrolEvent.Finished) {
+                        navController.popBackStack()
                     }
                 }
             }

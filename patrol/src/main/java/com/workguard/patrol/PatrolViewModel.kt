@@ -261,6 +261,7 @@ class PatrolViewModel @Inject constructor(
                         ?: updatedPoints.count { !it.isScanned }
                     val sessionComplete = scanResult.data.sessionComplete || remaining == 0
                     val finalRemaining = if (sessionComplete) 0 else remaining
+                    val nextPoint = updatedPoints.firstOrNull { !it.isScanned }
                     val newCompletedSessions = if (sessionComplete) {
                         (state.value.completedSessions + 1).coerceAtMost(state.value.maxSessionsPerShift)
                     } else {
@@ -271,7 +272,7 @@ class PatrolViewModel @Inject constructor(
                             isLoading = false,
                             selectedPoint = null,
                             statusMessage = if (sessionComplete) {
-                                "Sesi selesai, boleh mulai sesi berikutnya"
+                                "Sesi selesai, kembali ke beranda"
                             } else {
                                 "Berhasil scan ${selected.name}"
                             },
@@ -279,6 +280,7 @@ class PatrolViewModel @Inject constructor(
                             remainingPoints = finalRemaining,
                             sessionComplete = sessionComplete,
                             patrolSessionId = if (sessionComplete) null else it.patrolSessionId,
+                            selectedPoint = if (!sessionComplete) nextPoint else null,
                             completedSessions = newCompletedSessions
                         )
                     }
@@ -290,6 +292,12 @@ class PatrolViewModel @Inject constructor(
                         remainingPoints = finalRemaining,
                         sessionComplete = sessionComplete
                     )
+                    if (sessionComplete) {
+                        _events.emit(PatrolEvent.Finished)
+                    } else if (nextPoint != null) {
+                        // auto buka kamera titik berikutnya
+                        _state.update { it.copy(selectedPoint = nextPoint) }
+                    }
                 }
                 is ApiResult.Error -> {
                     val message = scanResult.throwable.message
@@ -520,4 +528,5 @@ class PatrolViewModel @Inject constructor(
 
 sealed interface PatrolEvent {
     data class RequireFaceScan(val context: FaceContext) : PatrolEvent
+    data object Finished : PatrolEvent
 }
