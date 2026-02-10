@@ -187,7 +187,7 @@ fun ScanScreen(
                     color = UiTokens.Text,
                     fontFamily = poppins,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 96.sp,
+                    fontSize = 50.sp,
                     letterSpacing = 0.5.sp
                 )
                 Text(
