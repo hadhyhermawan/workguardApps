@@ -17,9 +17,27 @@ fun WorkGuardTheme(content: @Composable () -> Unit) {
         Font(R.font.poppins_semibold, FontWeight.SemiBold)
     )
 
+    fun Typography.withFontFamily(fontFamily: FontFamily): Typography = Typography(
+        displayLarge = displayLarge.copy(fontFamily = fontFamily),
+        displayMedium = displayMedium.copy(fontFamily = fontFamily),
+        displaySmall = displaySmall.copy(fontFamily = fontFamily),
+        headlineLarge = headlineLarge.copy(fontFamily = fontFamily),
+        headlineMedium = headlineMedium.copy(fontFamily = fontFamily),
+        headlineSmall = headlineSmall.copy(fontFamily = fontFamily),
+        titleLarge = titleLarge.copy(fontFamily = fontFamily),
+        titleMedium = titleMedium.copy(fontFamily = fontFamily),
+        titleSmall = titleSmall.copy(fontFamily = fontFamily),
+        bodyLarge = bodyLarge.copy(fontFamily = fontFamily),
+        bodyMedium = bodyMedium.copy(fontFamily = fontFamily),
+        bodySmall = bodySmall.copy(fontFamily = fontFamily),
+        labelLarge = labelLarge.copy(fontFamily = fontFamily),
+        labelMedium = labelMedium.copy(fontFamily = fontFamily),
+        labelSmall = labelSmall.copy(fontFamily = fontFamily),
+    )
+
     MaterialTheme(
         colorScheme = lightColorScheme(),
-        typography = Typography(defaultFontFamily = poppins),
+        typography = Typography().withFontFamily(poppins),
         shapes = Shapes(),
         content = content
     )
