@@ -62,6 +62,21 @@ data class AttendanceTodayResponse(
     val shiftName: String? = null
 )
 
+data class AttendanceHistoryItem(
+    val date: String,
+    @Json(name = "shift_start")
+    val shiftStart: String? = null,
+    @Json(name = "shift_end")
+    val shiftEnd: String? = null,
+    @Json(name = "shift_name")
+    val shiftName: String? = null,
+    @Json(name = "check_in_at")
+    val checkInAt: String? = null,
+    @Json(name = "check_out_at")
+    val checkOutAt: String? = null,
+    val reason: String? = null
+)
+
 data class AttendanceRulesResponse(
     @Json(name = "allowed_radius_m")
     val allowedRadiusM: Int? = null,

@@ -139,6 +139,14 @@ interface ApiService {
         @Query("date") date: String? = null
     ): ApiEnvelope<AttendanceTodayResponse>
 
+    @GET("employee/attendance/history")
+    suspend fun getAttendanceHistory(
+        @Query("month") month: String? = null,
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date") endDate: String? = null,
+        @Query("limit") limit: Int? = null
+    ): ApiEnvelope<List<AttendanceHistoryItem>>
+
     @GET("employee/attendance/rules")
     suspend fun getAttendanceRules(
         @Query("date") date: String? = null

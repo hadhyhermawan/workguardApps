@@ -25,7 +25,10 @@ import retrofit2.HttpException
 
 data class WorkScheduleScreenState(
     val todayDate: String = "",
-    val month: WorkScheduleMonthState = WorkScheduleMonthState()
+    val month: WorkScheduleMonthState = WorkScheduleMonthState(),
+    val history: List<WorkScheduleDay> = emptyList(),
+    val isHistoryLoading: Boolean = false,
+    val historyError: String? = null
 )
 
 @HiltViewModel
@@ -52,6 +55,7 @@ class WorkScheduleViewModel @Inject constructor(
             )
         }
         loadMonth(year, month)
+        loadHistory(year, month)
     }
 
     fun refresh() {
@@ -60,6 +64,7 @@ class WorkScheduleViewModel @Inject constructor(
         val year = current.year.takeIf { it > 0 } ?: fallbackYear
         val month = current.month.takeIf { it in 1..12 } ?: fallbackMonth
         loadMonth(year, month, force = true)
+        loadHistory(year, month, force = true)
     }
 
     fun loadMonth(year: Int, month: Int, force: Boolean = false) {
@@ -136,6 +141,47 @@ class WorkScheduleViewModel @Inject constructor(
                         errorMessage = errorMessage
                     )
                 )
+            }
+        }
+    }
+
+    fun loadHistory(year: Int, month: Int, force: Boolean = false) {
+        if (year <= 0 || month !in 1..12) return
+        if (!force && state.value.history.isNotEmpty()) return
+        viewModelScope.launch {
+            _state.update { it.copy(isHistoryLoading = true, historyError = null) }
+            val monthStr = "%04d-%02d".format(year, month)
+            try {
+                val response = apiService.getAttendanceHistory(month = monthStr)
+                if (response.success == false) {
+                    throw IllegalStateException(response.message ?: "Gagal memuat history")
+                }
+                val items = response.data.orEmpty()
+                val mapped = items.map {
+                    WorkScheduleDay(
+                        date = it.date,
+                        shiftName = it.shiftName,
+                        shiftStart = it.shiftStart,
+                        shiftEnd = it.shiftEnd,
+                        checkInAt = it.checkInAt,
+                        checkOutAt = it.checkOutAt,
+                        reason = it.reason
+                    )
+                }
+                _state.update { st ->
+                    st.copy(
+                        history = mapped,
+                        isHistoryLoading = false,
+                        historyError = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { st ->
+                    st.copy(
+                        isHistoryLoading = false,
+                        historyError = e.message ?: "Gagal memuat history"
+                    )
+                }
             }
         }
     }

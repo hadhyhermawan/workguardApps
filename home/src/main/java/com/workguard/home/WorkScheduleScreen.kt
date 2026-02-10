@@ -194,8 +194,10 @@ fun WorkScheduleScreen(
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    DayScheduleList(
-                        days = monthState.days,
+                    AttendanceHistoryList(
+                        items = state.history,
+                        isLoading = state.isHistoryLoading,
+                        error = state.historyError,
                         todayDate = state.todayDate,
                         accent = accent,
                         muted = muted,
@@ -464,15 +466,17 @@ private fun WorkScheduleDayDetailCard(
 }
 
 @Composable
-private fun DayScheduleList(
-    days: List<WorkScheduleDay>,
+private fun AttendanceHistoryList(
+    items: List<WorkScheduleDay>,
+    isLoading: Boolean,
+    error: String?,
     todayDate: String,
     accent: Color,
     muted: Color,
     cardColor: Color
 ) {
-    val sorted = remember(days) {
-        days
+    val sorted = remember(items) {
+        items
             .filter { isPastOrToday(it.date, todayDate) }
             .sortedByDescending { it.date }
     }
@@ -483,23 +487,50 @@ private fun DayScheduleList(
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF1F2A30)
         )
-        if (sorted.isEmpty()) {
-            EmptyStateCard(text = "Belum ada jadwal pada bulan ini.")
-        } else {
-            sorted.forEach { day ->
-                DayScheduleCard(
-                    day = day,
-                    accent = accent,
-                    muted = muted,
-                    cardColor = cardColor
-                )
+        when {
+            isLoading -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = accent,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Memuat riwayat...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+            }
+            !error.isNullOrBlank() -> {
+                EmptyStateCard(text = error)
+            }
+            sorted.isEmpty() -> {
+                EmptyStateCard(text = "Belum ada riwayat kehadiran.")
+            }
+            else -> {
+                sorted.forEach { day ->
+                    AttendanceHistoryCard(
+                        day = day,
+                        accent = accent,
+                        muted = muted,
+                        cardColor = cardColor
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DayScheduleCard(
+private fun AttendanceHistoryCard(
     day: WorkScheduleDay,
     accent: Color,
     muted: Color,
