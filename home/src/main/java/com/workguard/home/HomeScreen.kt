@@ -749,6 +749,50 @@ private fun PatrolTaskChip(task: HomeTaskItem, accent: Color, cardColor: Color, 
 }
 
 @Composable
+private fun StatBadge(
+    value: String,
+    label: String,
+    icon: ImageVector,
+    accent: Color,
+    muted: Color,
+    cardColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(accent.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = label, tint = accent)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color(0xFF1F2A30)
+                )
+                Text(text = label, style = MaterialTheme.typography.bodySmall, color = muted)
+            }
+        }
+    }
+}
+
+@Composable
 private fun AllMenuCard(
     cardColor: Color,
     accent: Color,
