@@ -155,8 +155,7 @@ class PatrolViewModel @Inject constructor(
                             patrolSessionId = sessionResult.data,
                             points = emptyList(),
                             remainingPoints = null,
-                            sessionComplete = false,
-                            selectedPoint = null
+                            sessionComplete = false
                         )
                     }
                     saveSession(
@@ -365,7 +364,7 @@ class PatrolViewModel @Inject constructor(
                             current.copy(
                                 points = mapped,
                                 remainingPoints = remaining,
-                                selectedPoint = nextPoint ?: current.selectedPoint
+                                statusMessage = current.statusMessage // keep, no selectedPoint field
                             )
                         }
                     }
