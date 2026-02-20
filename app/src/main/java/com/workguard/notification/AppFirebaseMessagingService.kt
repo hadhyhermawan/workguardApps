@@ -45,6 +45,7 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
         val hasNewsId = rawNewsId?.toIntOrNull()?.let { it > 0 } == true
         val threadId = (data["thread_id"] ?: data["threadId"])?.takeIf { it.isNotBlank() }
         val hasThreadId = !threadId.isNullOrBlank()
+        val reminderType = data["reminder_type"]   // absen_patroli / absen_masuk / absen_pulang / dll
         val title = message.notification?.title
             ?: data["title"]
             ?: "WorkGuard"
@@ -52,6 +53,7 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
             ?: data["body"]
             ?: data["summary"]
             ?: ""
+
         when {
             type == NotificationRoute.TARGET_NEWS || hasNewsId -> {
                 val newsId = rawNewsId?.toIntOrNull()
@@ -74,6 +76,18 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
                     requestCode = threadId?.hashCode() ?: 0
                 ) { intent ->
                     NotificationRoute.putChatExtras(intent, threadId)
+                }
+            }
+            type == NotificationRoute.TARGET_REMINDER -> {
+                // Notif reminder patroli / absen masuk / absen pulang
+                showNotification(
+                    title = title,
+                    body = body,
+                    channelId = CHANNEL_REMINDER,
+                    channelName = "Pengingat",
+                    requestCode = reminderType?.hashCode() ?: 0
+                ) { intent ->
+                    NotificationRoute.putReminderExtras(intent, reminderType)
                 }
             }
             else -> {
@@ -142,9 +156,10 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     companion object {
-        private const val TAG = "FCMService"
-        private const val CHANNEL_ID = "workguard_default"
-        private const val CHANNEL_NEWS = "workguard_news"
-        private const val CHANNEL_CHAT = "workguard_chat"
+        private const val TAG            = "FCMService"
+        private const val CHANNEL_ID      = "workguard_default"
+        private const val CHANNEL_NEWS    = "workguard_news"
+        private const val CHANNEL_CHAT    = "workguard_chat"
+        private const val CHANNEL_REMINDER = "workguard_reminder"   // channel baru untuk reminder
     }
 }
